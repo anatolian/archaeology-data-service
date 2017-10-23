@@ -1,0 +1,41 @@
+<p id="notice"><%= notice %></p>
+
+<div>
+
+<h1>Welcome to Artifact Tracker!</h1>
+<p>We are the single best place to store, share, and analyze your 3D artifacts! Please upload artifact files above, navigate to the "Tags" page to add extra metadata to your artifacts. You can also join or create groups via the "Groups" page to share your metadata and files with other researchers. You can find more people in the "Users" page.</p>
+
+</div>
+
+<h1>Artifacts</h1>
+
+<table class="table">
+  <thead>
+    <tr>
+      <th><%= link_to "Name", "/artifacts/sort/name" %></th>
+      <th><%= link_to "Description", "/artifacts/sort/description" %></th>
+      <th><%= link_to "Longitude", "/artifacts/sort/longitude" %></th>
+      <th><%= link_to "Latitude", "/artifacts/sort/latitude" %></th>
+      <th><%= link_to "Filepath", "/artifacts/sort/filepath" %></th>
+      <th colspan="5"></th>
+    </tr>
+  </thead>
+
+  <tbody>
+    <% @artifacts.each do |artifact| %>
+      <tr>
+        <td><button type="button" class="btn btn-default"><%= link_to "#{artifact.name}", artifact %></button></td>
+        <td><%= artifact.description %></td>
+        <td><%= artifact.longitude %></td>
+        <td><%= artifact.latitude %></td>
+        <td><%= artifact.filepath %></td>
+        <td><button type="button" class="btn btn-default"><%= link_to 'Edit', edit_artifact_path(artifact) %></button></td>
+        <td><button type="button" class="btn btn-warning"><%= link_to 'Destroy', artifact, method: :delete, data: { confirm: 'Are you sure?' } %></button></td>
+      </tr>
+    <% end %>
+  </tbody>
+</table>
+
+<br>
+
+<button type="button" class="btn btn-lg btn-primary"><%= link_to 'New Artifact', new_artifact_path %></button>
