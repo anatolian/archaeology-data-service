@@ -9,17 +9,17 @@ name = "pypi"
 
 "aniso8601" = "==1.2.0"
 click = "==6.7"
-Flask = "==0.12.1"
+flask = "*"
 flask-heroku = "==0.1.9"
-Flask-HTTPAuth = "==3.2.2"
-flask-marshmallow = "==0.7.0"
-Flask-RESTful = "==0.3.5"
-Flask-Restless = "==0.17.0"
-Flask-SQLAlchemy = "==2.2"
+flask-httpauth = "==3.2.2"
+flask-marshmallow = "*"
+flask-restful = "*"
+flask-restless = "==0.17.0"
+flask-sqlalchemy = "*"
 gunicorn = "==19.6.0"
 itsdangerous = "==0.24"
-"Jinja2" = "==2.9.6"
-MarkupSafe = "==1.0"
+"jinja2" = "==2.9.6"
+markupsafe = "==1.0"
 marshmallow = "==2.13.5"
 marshmallow-sqlalchemy = "==0.13.1"
 mimerender = "==0.6.0"
@@ -28,14 +28,9 @@ pyparsing = "==2.1.10"
 python-dateutil = "==2.6.0"
 python-mimeparse = "==1.6.0"
 pytz = "==2016.10"
-SQLAlchemy = "==1.1.9"
-Werkzeug = "==0.12.1"
+sqlalchemy = "==1.1.9"
+werkzeug = "==0.12.1"
+requests = "*"
 
 
 [dev-packages]
-
-
-
-[requires]
-
-python_version = "3.6"

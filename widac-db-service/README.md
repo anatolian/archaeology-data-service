@@ -8,4 +8,3 @@ Getting Started:
 
 3. Set app.run(debug=False) for production. 
 
-POSTGRES PORT = 5432
