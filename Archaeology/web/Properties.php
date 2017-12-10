@@ -7,11 +7,11 @@
  */
 
 // PG info
-define("PG_HOST", "");
-define("PG_PORT", "");
-define("PG_DB", "");
-define("PG_USERNAME", "");
-define("PG_PASSWORD", "");
+define("PG_HOST", "XXX");
+define("PG_PORT", "5432");
+define("PG_DB", "XXX");
+define("PG_USERNAME", "XXX");
+define("PG_PASSWORD", "XXX");
 
 // SQL Fields
 define("TYPE", "reading_location");
@@ -22,6 +22,6 @@ define("DESCRIPTION", "description");
 
 // Image Upload Path
 define("TEST_BASE_IMAGE_PATH", "/Library/WebServer/Documents/");
-define("TEST_BASE_IMAGE_URL", "http://192.168.2.214/");
+define("TEST_BASE_IMAGE_URL", "XXX");
 
 define("TEST_MODE", false);
