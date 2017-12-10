@@ -24,6 +24,13 @@ The /web/php_script is set up in the Procfile (web/ at the end), change to the c
 
 To set up a web server with Heroku: https://devcenter.heroku.com/articles/getting-started-with-php#introduction
 
+To set up a PostgreSQL with Heroku: https://devcenter.heroku.com/articles/heroku-postgresql#provisioning-heroku-postgres
+This will attach your database to a Heroku app, but may be accessed outside of this app.
+From terminal/cmd prompt, with Postgres set up:
+psql -h HOST -U USER PASS
+where HOST, USER, and PASS can be found in your Heroku properties if you're using Heroku. You can also access a database created outside of Heroku the same way.
+
+
 
 Excavation:
 This app was designed for archaeological excavation and incorporates three different program flows. The first takes individual photographs of excavated archaeological contexts, the second collects a batch of photographs for 3d photogrammetry processing, and the third enables multiple photographs of archaeological samples, such as ceramics or lithics. The app depends on the php webservice both to provide the archaeological metadata for users to select, as well as to upload the resultant photograph files. Network connectivity is assumed at all times.
