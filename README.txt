@@ -34,10 +34,10 @@ psql -h HOST -U USER PASS
 where HOST, USER, and PASS can be found in your Heroku properties if you're using Heroku. You can also access a database created outside of Heroku the same way.
 
 The server can be accessed via https://serverURL.com
-The scripts are currently being saved in the top directory and can be called by appending their names to the end. 
-For example: https://serverURL.com/test_service.php is a script that checks a table in the database that is never empty, and returns whether or not a connection has been made.
+The scripts are currently being saved in the top directory and can be called by appending their names to the end with the correct routing.
+For example, with scripts in the top level directory: https://serverURL.com/test_service.php is a script that checks a table in the database that is never empty, and returns whether or not a connection has been made.
 Some scripts require arguments in order to run.
-For example: https://serverURL.com/get_area_northing.php?area_easting=10
+For example, with scripts in the top level directory: https://serverURL.com/get_area_northing.php?area_easting=10
 or
 https://serverURL.com/get_sample_number.php?area_easting=10&area_northing=20&context_number=1
 
