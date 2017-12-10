@@ -7,11 +7,11 @@
  */
 
 // PG info
-define("PG_HOST", "jdbc:postgresql://158.130.254.207:5433/pennMuseum");
-define("PG_PORT", "5433");
-define("PG_DB", "pennMuseum");
-define("PG_USERNAME", "postgres");
-define("PG_PASSWORD", "Kara@pg");
+define("PG_HOST", "");
+define("PG_PORT", "");
+define("PG_DB", "");
+define("PG_USERNAME", "");
+define("PG_PASSWORD", "");
 
 // SQL Fields
 define("TYPE", "reading_location");

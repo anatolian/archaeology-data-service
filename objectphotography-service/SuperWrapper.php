@@ -17,7 +17,7 @@ class SuperWrapper {
     public static function get_db() {
         self::$db = new PgDB();
         return self::$db->getDB();
-    }
+    }	
 
     public static function close_db() {
         $db = null;
@@ -26,18 +26,22 @@ class SuperWrapper {
 
     public static function get_service_status() {
 
-        $sql = "select * from options.procedure_properties";
+        $sql = "SELECT * FROM options.procedure_properties;";
         $stm = self::get_db()->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
+		
         if(count($result) == 0) {
             $stm = null;
-            return array("status" => false);
+			$arr = array('status' => false);
         } else {
             $stm = null;
-            return array("status" => true);
+			$arr = array('status' => true);
         }
+		header('Content-type: application/json');
+		$json = json_encode($arr);
 
+		echo $json;
     }
 
     public static function is_item_exist_in_DB($item_id) {
@@ -46,7 +50,7 @@ class SuperWrapper {
             return array("status" => false);
         }
 
-        $sql = "select items.itemid from items.items items where items.itemid=:itemid";
+        $sql = "SELECT items.itemid FROM items.items items WHERE items.itemid=:itemid";
         $stm = self::get_db()->prepare($sql);
         $stm->execute(array(
             ":itemid" => $item_id,
@@ -110,7 +114,7 @@ class SuperWrapper {
 
     public static function get_list_of_lightness_from_DB() {
         $result_array = array();
-        $sql = "select distinct lightness_value from options.munsell_colors order by lightness_value";
+        $sql = "SELECT distinct lightness_value FROM options.munsell_colors order by lightness_value";
         $stm = self::get_db()->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -122,7 +126,7 @@ class SuperWrapper {
     }
     public static function get_list_of_chromas_from_DB() {
         $result_array = array();
-        $sql = "select distinct chroma from options.munsell_colors order by chroma";
+        $sql = "SELECT distinct chroma FROM options.munsell_colors order by chroma";
         $stm = self::get_db()->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -136,7 +140,7 @@ class SuperWrapper {
 
     public static function get_list_of_reading_locs_from_DB() {
         $result_array = array();
-        $sql = "select reading_location from options.munsell_color_reading_locations order by \"order\"";
+        $sql = "SELECT reading_location FROM options.munsell_color_reading_locations order by \"order\"";
         $stm = self::get_db()->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -190,7 +194,7 @@ class SuperWrapper {
         if($site_id == 0) {
             return $result_array;
         } else {
-            $sql = "select items.itemid from items.items items where items.siteid=:siteid";
+            $sql = "SELECT items.itemid FROM items.items items WHERE items.siteid=:siteid";
             $stm = self::get_db()->prepare($sql);
             $stm->execute(array(
                 ":siteid" => $site_id,
@@ -208,7 +212,7 @@ class SuperWrapper {
 
     public static function get_sitename_and_siteids_from_DB() {
         $result_array = array();
-        $sql = "select * from items.view_items_per_site";
+        $sql = "SELECT * FROM items.view_items_per_site";
         $stm = self::get_db()->prepare($sql);
         $stm->execute();
         $result = $stm->fetchAll(PDO::FETCH_ASSOC);
@@ -541,3 +545,4 @@ class SuperWrapper {
 
 
 } 
+?>
