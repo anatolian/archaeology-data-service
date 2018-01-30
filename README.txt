@@ -4,7 +4,7 @@ Database is saved in Archaeology/web/Properties.php.
 
 You may use an Amazon EC2 instance:
 You will need to create an Amazon EC2 instance to connect to: https://aws.amazon.com/ec2/getting-started/
-	Make sure to open port 5432 to 
+	Make sure to open port 5432 to all traffic
 	Make sure to create a key pair and download it to your machine. Either store the .pem outside of the project directory or add it
 		to the .gitignore. NEVER PUSH THE .pem FILE!
 	You will need to copy the contents of the Archaeology service directory (NOT the directory itself) to the EC2 instance.
@@ -42,13 +42,3 @@ or
 https://serverURL.com/get_sample_number.php?area_easting=10&area_northing=20&context_number=1
 
 As it is currently a server made solely for the app to call scripts, there are no views, and most links on the server will return a blank page or returning JSON strings or arrays that contain the information called from the script.
-
-
-
-Excavation:
-This app was designed for archaeological excavation and incorporates three different program flows. The first takes individual photographs of excavated archaeological contexts, the second collects a batch of photographs for 3d photogrammetry processing, and the third enables multiple photographs of archaeological samples, such as ceramics or lithics. The app depends on the php webservice both to provide the archaeological metadata for users to select, as well as to upload the resultant photograph files. Network connectivity is assumed at all times.
-
-This webservice can be deployed to a php server which has access to the PostgresQL database.  The database structure can be recreated using the db.sql script. The include/config.inc.php file must be updated with the connection parameters, and the server's url.
-
-If using EC2, create an images directory in root. Configure Excavation/include/config.inc.php in the same way as above.
-	AGAIN, UNLESS USING ENVIRONMENT VARIABLES NEVER PUSH THESE VALUES
