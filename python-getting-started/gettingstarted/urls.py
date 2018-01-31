@@ -9,7 +9,8 @@ import hello.views
 urlpatterns = [
     url(r'^$', hello.views.index, name = 'index'),
     url(r'^test', hello.views.test, name = 'test'),
-    url(r'^relations', hello.views.relations, name = 'relations')
+    url(r'^relations', hello.views.relations, name = 'relations'),
+    url(r'^get_area_eastings', hello.views.get_area_eastings, name = 'get_area_eastings')
     # url(r'^db', hello.views.db, name='db'),
     # path('admin/', admin.site.urls),
 ]

@@ -23,17 +23,18 @@ def test(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	cursor.execute("SELECT * FROM Areas;")
-	response = 'Connection Test response:\narea_easting | area_northing | area_key | status';
+	response = 'area_easting | area_northing | area_key | status';
 	for easting, northing, key, status in cursor.fetchall():
 		response = response + "\n" + str(easting) + " | " + str(northing) + " | " + key + " | " + status
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
 
+# Get the relation names in the database
 def relations(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	cursor.execute("SELECT relname FROM pg_stat_user_tables WHERE schemaname = 'public';")
-	response = 'relname';
+	response = 'relname'
 	count = 0;
 	for relname in cursor.fetchall():
 		count += 1
@@ -41,5 +42,21 @@ def relations(request):
 		response = response + "\n" + relname[0]
 	if (count == 0):
 		response = 'Your database is empty. Modify initialization.sql to manually insert values, or import data from another database'
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
+
+# Get the eastings in the database
+def get_area_eastings(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT area_easting FROM Samples WHERE status = 'active' ORDER BY area_easting ASC;")
+	response = 'area_easting'
+	count = 0
+	for easting in cursor.fetchall():
+		count += 1
+		# Python thinks this is a tuple of 1 element
+		response = response + "\n" + str(easting[0])
+	if (count == 0):
+		response = 'Samples relation is empty'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
