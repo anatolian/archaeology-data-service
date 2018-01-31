@@ -8,7 +8,8 @@ import hello.views
 # url(r'^blog/', include('blog.urls')),
 urlpatterns = [
     url(r'^$', hello.views.index, name = 'index'),
-    url(r'^test', hello.views.test, name = 'test')
+    url(r'^test', hello.views.test, name = 'test'),
+    url(r'^relations', hello.views.relations, name = 'relations')
     # url(r'^db', hello.views.db, name='db'),
     # path('admin/', admin.site.urls),
 ]

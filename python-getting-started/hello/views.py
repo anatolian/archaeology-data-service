@@ -23,8 +23,23 @@ def test(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	cursor.execute("SELECT * FROM Areas;")
-	response = 'area_easting | area_northing | area_key | status';
+	response = 'Connection Test response:\narea_easting | area_northing | area_key | status';
 	for easting, northing, key, status in cursor.fetchall():
 		response = response + "\n" + str(easting) + " | " + str(northing) + " | " + key + " | " + status
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
+
+def relations(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT relname FROM pg_stat_user_tables WHERE schemaname = 'public';")
+	response = 'relname';
+	count = 0;
+	for relname in cursor.fetchall():
+		count += 1
+		# Python seems to think this is a tuple for some reason, need to index second character
+		response = response + "\n" + relname[0]
+	if (count == 0):
+		response = 'Your database is empty. Modify initialization.sql to manually insert values, or import data from another database'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
