@@ -50,13 +50,26 @@ def get_area_eastings(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	cursor.execute("SELECT area_easting FROM Samples WHERE status = 'active' ORDER BY area_easting ASC;")
-	response = 'area_easting'
-	count = 0
+	response = '<h3>Eastings</h3>\n<ul>'
 	for easting in cursor.fetchall():
-		count += 1
 		# Python thinks this is a tuple of 1 element
-		response = response + "\n" + str(easting[0])
-	if (count == 0):
-		response = 'Samples relation is empty'
+		eastingString = str(easting[0])
+		response = response + "\n<li><a href = '/get_area_northings/" + eastingString + "'>" + eastingString + "</a></li>"
+	response = response + "\n</ul>"
+	connection.close()
+	return HttpResponse(response, content_type = 'text/html')
+
+# Get the northings under a particular easting
+def get_area_northings(request, easting):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	eastingString = str(easting)
+	cursor.execute("SELECT area_northing FROM Samples WHERE status = 'active' AND area_northing = " + eastingString + " ORDER BY area_easting ASC;")
+	response = '<h3>Northings</h3>\n<ul>'
+	for northing in cursor.fetchall():
+		northingString = str(northing)
+		# Python thinks this is a tuple of 1 element
+		response = response + "\n<li><a href = '/get_area_contexts/" + eastingString + "/" + northingString + "'>" + eastingString + "." + northingString + "</a></li>"
+	response = response + "\n</ul>"
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
