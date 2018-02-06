@@ -58,7 +58,7 @@ def get_area_eastings(request):
 		found = True
 	response = response + "</ul>"
 	if (not found):
-		response = '<h3>Error: No area_eastings are stored within Samples table</h3>'
+		response = '<h3>Error: No area_eastings found in Samples table</h3>'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -81,7 +81,7 @@ def get_area_northings(request):
 		found = True
 	response = response + "</ul>"
 	if (not found):
-		response = '<h3>Error: No area_northings with area_easting = ' + easting + " found in Samples"
+		response = '<h3>Error: No area_northings with area_easting = ' + easting + ' found in Samples table</h3>'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -112,7 +112,7 @@ def get_context_numbers(request):
 		found = True
 	response = response + "</ul>"
 	if (not found):
-		response = '<h3>Error: No context_numbers with area_easting = ' + easting + ' and area_northing = ' + northing + ' found in Samples'
+		response = '<h3>Error: No context_numbers with area_easting = ' + easting + ' and area_northing = ' + northing + ' found in Samples table</h3>'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -149,6 +149,48 @@ def get_sample_numbers(request):
 	response = response + "</ul>"
 	if (not found):
 		response = '<h3>Error: No sample_numbers with area_easting = ' + easting + ', area_northing = ' + northing
-		response = response + ', and context_number = ' + contextString + ' found in Samples'
+		response = response + ', and context_number = ' + context + ' found in Samples table</h3>'
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
+
+# Get a sample from the database
+def get_sample(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	try:
+		int(easting)
+	except ValueError:
+		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
+	try:
+		int(northing)
+	except ValueError:
+		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
+	try:
+		int(context)
+	except ValueError:
+		return HttpResponse('<h3>Provided context_number is not a number</h3>', content_type = 'text/html')
+	try:
+		int(sample)
+	except ValueError:
+		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
+	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' AND area_northing = '" + northing
+	query = query  + "' AND context_number = '" + context + "' AND sample_number = '" + sample + "'"
+	cursor.execute(query)
+	response = 'material | exterior_color_hue | exterior_color_lightness_value | exterior_color_chroma | interior_color_hue | '
+	response = response + 'interior_color_lightness_value | interior_color_chroma | weight_kilograms'
+	found = False
+	for sampleEntry in cursor.fetchall():
+		response = response + "\n" + str(sampleEntry[4])
+		# Skipping area_easting, area_northing, context_number, sample_number, and status
+		for i in range(5, 12):
+			response = response + " | " + str(sampleEntry[i])
+		found = True
+	if (not found):
+		response = 'Error: No samples with area_easting = ' + easting + ', area_northing = ' + northing
+		response = response + ', context_number = ' + context + ', and sample_number = ' + sample + ' found in Samples table'
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
