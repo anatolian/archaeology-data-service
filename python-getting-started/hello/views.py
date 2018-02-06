@@ -25,6 +25,7 @@ def test(request):
 	response = 'area_easting | area_northing | area_key | status';
 	for easting, northing, key, status in cursor.fetchall():
 		response = response + "\n" + str(easting) + " | " + str(northing) + " | " + key + " | " + status
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
 
@@ -41,6 +42,7 @@ def relations(request):
 		response = response + "\n" + relname[0]
 	if (not found):
 		response = 'Your database is empty. Modify initialization.sql to manually insert values, or import data from another database'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
 
@@ -59,6 +61,7 @@ def get_area_eastings(request):
 	response = response + "</ul>"
 	if (not found):
 		response = '<h3>Error: No area_eastings found in Samples table</h3>'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -82,6 +85,7 @@ def get_area_northings(request):
 	response = response + "</ul>"
 	if (not found):
 		response = '<h3>Error: No area_northings with area_easting = ' + easting + ' found in Samples table</h3>'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -113,6 +117,7 @@ def get_context_numbers(request):
 	response = response + "</ul>"
 	if (not found):
 		response = '<h3>Error: No context_numbers with area_easting = ' + easting + ' and area_northing = ' + northing + ' found in Samples table</h3>'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -150,6 +155,7 @@ def get_sample_numbers(request):
 	if (not found):
 		response = '<h3>Error: No sample_numbers with area_easting = ' + easting + ', area_northing = ' + northing
 		response = response + ', and context_number = ' + context + ' found in Samples table</h3>'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
@@ -178,7 +184,7 @@ def get_sample(request):
 	except ValueError:
 		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
 	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' AND area_northing = '" + northing
-	query = query  + "' AND context_number = '" + context + "' AND sample_number = '" + sample + "'"
+	query = query  + "' AND context_number = '" + context + "' AND sample_number = '" + sample + "';"
 	cursor.execute(query)
 	response = 'material | exterior_color_hue | exterior_color_lightness_value | exterior_color_chroma | interior_color_hue | '
 	response = response + 'interior_color_lightness_value | interior_color_chroma | weight_kilograms'
@@ -192,5 +198,39 @@ def get_sample(request):
 	if (not found):
 		response = 'Error: No samples with area_easting = ' + easting + ', area_northing = ' + northing
 		response = response + ', context_number = ' + context + ', and sample_number = ' + sample + ' found in Samples table'
+	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
+
+# Set the weight of an object
+def set_weight(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	weight = request.GET.get('weight', '')
+	try:
+		int(easting)
+		int(northing)
+		int(sample)
+		int(context)
+		float(weight)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
+	query = "UPDATE Samples SET weight_kilograms = " + weight + " WHERE area_easting = " + easting + " AND area_northing = "
+	query = query + northing + " AND context_number = " + context + " AND sample_number = " + sample + ';'
+	response = None
+	try:
+		cursor.execute(query)
+		# Make sure the query updated a row
+		if (cursor.rowcount == 1):
+			response = HttpResponse("Update successful", content_type = 'text/plain')
+		connection.commit()
+		cursor.close()
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Object not found in Samples table", content_type = "text/plain")
+	finally:
+		cursor.close()
+		return response
