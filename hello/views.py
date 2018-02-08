@@ -17,19 +17,6 @@ database = os.environ['postgres-database']
 def index(request):
     return render(request, 'index.html')
 
-# Run the connection test
-# Param: request - HTTP client request
-def test(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
-	cursor.execute("SELECT * FROM Areas;")
-	response = 'area_easting | area_northing | area_key | status';
-	for easting, northing, key, status in cursor.fetchall():
-		response = response + "\n" + str(easting) + " | " + str(northing) + " | " + key + " | " + status
-	cursor.close()
-	connection.close()
-	return HttpResponse(response, content_type = 'text/plain')
-
 # Get the relation names in the database
 # Param: request - HTTP client request
 def relations(request):
@@ -53,7 +40,7 @@ def relations(request):
 def get_area_eastings(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT area_easting FROM Samples WHERE status = 'active' ORDER BY area_easting ASC;")
+	cursor.execute("SELECT DISTINCT area_easting FROM Samples WHERE status = 'active' ORDER BY area_easting ASC;")
 	response = '<h3>Area Eastings:</h3><ul>'
 	found = False
 	for easting in cursor.fetchall():
@@ -78,7 +65,7 @@ def get_area_northings(request):
 		int(easting)
 	except ValueError:
 		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
-	cursor.execute("SELECT area_northing FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' ORDER BY area_northing ASC;")
+	cursor.execute("SELECT DISTINCT area_northing FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' ORDER BY area_northing ASC;")
 	response = '<h3>Area Northings:</h3><ul>'
 	found = False
 	for northing in cursor.fetchall():
@@ -108,7 +95,7 @@ def get_context_numbers(request):
 		int(northing)
 	except ValueError:
 		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
-	query = "SELECT context_number FROM Samples WHERE status = 'active' AND area_easting = '" + easting
+	query = "SELECT DISTINCT context_number FROM Samples WHERE status = 'active' AND area_easting = '" + easting
 	query = query + "' AND area_northing = '" + northing + "' ORDER BY context_number ASC;"
 	cursor.execute(query)
 	response = '<h3>Context Numbers:</h3><ul>'
