@@ -1,23 +1,24 @@
+# Simple webapp views for Archaeology Django service
+# Author: Christopher Besser
 from django.shortcuts import render
 from django.http import HttpResponse
 import psycopg2
 import os
-# Store the values for your own database in environment variables prior to running!
-hostname = os.environ.get('postgres-hostname')
-username = os.environ.get('postgres-username')
-password = os.environ.get('postgres-password')
-database = os.environ.get('postgres-database')
-# from .models import Greeting
+from boto.s3.connection import S3Connection
+# For local deployment, these should be defined in system environment variables.
+# For Heroku deployment, these must be set in the configuration
+hostname = os.environ['postgres-hostname']
+username = os.environ['postgres-username']
+password = os.environ['postgres-password']
+database = os.environ['postgres-database']
+# s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 # Main page
+# Param: request - HTTP client request
 def index(request):
     return render(request, 'index.html')
 
-# def db(request):
-#     greeting = Greeting()
-#     greeting.save()
-#     greetings = Greeting.objects.all()
-#     return render(request, 'db.html', {'greetings': greetings})
-
+# Run the connection test
+# Param: request - HTTP client request
 def test(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -30,6 +31,7 @@ def test(request):
 	return HttpResponse(response, content_type = 'text/plain')
 
 # Get the relation names in the database
+# Param: request - HTTP client request
 def relations(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -47,6 +49,7 @@ def relations(request):
 	return HttpResponse(response, content_type = 'text/plain')
 
 # Get the eastings in the database
+# Param: request - HTTP client request
 def get_area_eastings(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -66,6 +69,7 @@ def get_area_eastings(request):
 	return HttpResponse(response, content_type = 'text/html')
 
 # Get the northings under a particular easting
+# Param: request - HTTP client request
 def get_area_northings(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -90,6 +94,7 @@ def get_area_northings(request):
 	return HttpResponse(response, content_type = 'text/html')
 
 # Get contexts within an easting and northing
+# Param: request - HTTP client request
 def get_context_numbers(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -122,6 +127,7 @@ def get_context_numbers(request):
 	return HttpResponse(response, content_type = 'text/html')
 
 # Get sample numbers within an easting, northing, and context
+# Param: request - HTTP client request
 def get_sample_numbers(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -160,6 +166,7 @@ def get_sample_numbers(request):
 	return HttpResponse(response, content_type = 'text/html')
 
 # Get a sample from the database
+# Param: request - HTTP client request
 def get_sample(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -203,6 +210,7 @@ def get_sample(request):
 	return HttpResponse(response, content_type = 'text/plain')
 
 # Set the weight of an object
+# Param: request - HTTP client request
 def set_weight(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -228,9 +236,9 @@ def set_weight(request):
 		if (cursor.rowcount == 1):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
-		cursor.close()
 	except (Exception, psycopg2.DatabaseError) as error:
 		response = HttpResponse("Object not found in Samples table", content_type = "text/plain")
 	finally:
 		cursor.close()
+		connection.close()
 		return response
