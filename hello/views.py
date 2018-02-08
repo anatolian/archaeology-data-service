@@ -14,11 +14,13 @@ database = os.environ['postgres-database']
 # s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
 # Main page
 # Param: request - HTTP client request
+# Returns an HTML render
 def index(request):
     return render(request, 'index.html')
 
 # Get the relation names in the database
 # Param: request - HTTP client request
+# Returns an HTTP response
 def relations(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -37,6 +39,7 @@ def relations(request):
 
 # Get the eastings in the database
 # Param: request - HTTP client request
+# Returns an HTTP response
 def get_area_eastings(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -57,15 +60,16 @@ def get_area_eastings(request):
 
 # Get the northings under a particular easting
 # Param: request - HTTP client request
+# Returns an HTTP response
 def get_area_northings(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
 	easting = request.GET.get('easting', '')
 	try:
 		int(easting)
 	except ValueError:
 		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
-	cursor.execute("SELECT DISTINCT area_northing FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' ORDER BY area_northing ASC;")
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT DISTINCT area_northing FROM Samples WHERE status = 'active' AND area_easting = " + easting + " ORDER BY area_northing ASC;")
 	response = '<h3>Area Northings:</h3><ul>'
 	found = False
 	for northing in cursor.fetchall():
@@ -82,9 +86,8 @@ def get_area_northings(request):
 
 # Get contexts within an easting and northing
 # Param: request - HTTP client request
+# Returns an HTTP response
 def get_context_numbers(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	try:
@@ -95,8 +98,10 @@ def get_context_numbers(request):
 		int(northing)
 	except ValueError:
 		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
-	query = "SELECT DISTINCT context_number FROM Samples WHERE status = 'active' AND area_easting = '" + easting
-	query = query + "' AND area_northing = '" + northing + "' ORDER BY context_number ASC;"
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT DISTINCT context_number FROM Samples WHERE status = 'active' AND area_easting = " + easting
+	query = query + " AND area_northing = " + northing + " ORDER BY context_number ASC;"
 	cursor.execute(query)
 	response = '<h3>Context Numbers:</h3><ul>'
 	found = False
@@ -115,9 +120,8 @@ def get_context_numbers(request):
 
 # Get sample numbers within an easting, northing, and context
 # Param: request - HTTP client request
+# Returns an HTTP response
 def get_sample_numbers(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
@@ -133,8 +137,10 @@ def get_sample_numbers(request):
 		int(context)
 	except ValueError:
 		return HttpResponse('<h3>Provided context_number is not a number</h3>', content_type = 'text/html')
-	query = "SELECT sample_number FROM Samples WHERE status = 'active' AND area_easting = '" + easting
-	query = query + "' AND area_northing = '" + northing + "' AND context_number = '" + context + "' ORDER BY sample_number ASC;"
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT sample_number FROM Samples WHERE status = 'active' AND area_easting = " + easting
+	query = query + " AND area_northing = " + northing + " AND context_number = " + context + " ORDER BY sample_number ASC;"
 	cursor.execute(query)
 	response = '<h3>Sample Numbers:</h3><ul>'
 	found = False
@@ -154,9 +160,8 @@ def get_sample_numbers(request):
 
 # Get a sample from the database
 # Param: request - HTTP client request
+# Returns an HTTP response
 def get_sample(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
@@ -177,8 +182,10 @@ def get_sample(request):
 		int(sample)
 	except ValueError:
 		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
-	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = '" + easting + "' AND area_northing = '" + northing
-	query = query  + "' AND context_number = '" + context + "' AND sample_number = '" + sample + "';"
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = " + easting + " AND area_northing = " + northing
+	query = query  + " AND context_number = " + context + " AND sample_number = " + sample + ";"
 	cursor.execute(query)
 	response = 'material | exterior_color_hue | exterior_color_lightness_value | exterior_color_chroma | interior_color_hue | '
 	response = response + 'interior_color_lightness_value | interior_color_chroma | weight_kilograms'
@@ -198,9 +205,8 @@ def get_sample(request):
 
 # Set the weight of an object
 # Param: request - HTTP client request
+# Returns an HTTP response
 def set_weight(request):
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
@@ -214,6 +220,8 @@ def set_weight(request):
 		float(weight)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
 	query = "UPDATE Samples SET weight_kilograms = " + weight + " WHERE area_easting = " + easting + " AND area_northing = "
 	query = query + northing + " AND context_number = " + context + " AND sample_number = " + sample + ';'
 	response = None
@@ -224,8 +232,98 @@ def set_weight(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Object not found in Samples table", content_type = "text/plain")
+		response = HttpResponse("Error: Object not found in Samples table", content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
 		return response
+
+# Detect SQL keywords in a string
+# Param: text - string to search
+# Returns the found keyword, if any
+def find_sql_keyword(text):
+	keywords = [' ALL ', ' ALTER ', ' AND ', ' ANY ', ' ARRAY ', ' ARROW ', ' AS ', ' ASC ', ' AT ', ' BEGIN ', ' BETWEEN ', ' BY ', ' CASE ', ' CHECK ',\
+		' CLUSTERS ', ' CLUSTER ', ' COLAUTH ', ' COLUMNS ', ' COMPRESS ', ' CONNECT ', ' CRASH ', ' CREATE ', ' CURRENT ', ' DECIMAL ', ' DECLARE ',\
+		' DEFAULT ', ' DELETE ', ' DESC ', ' DISTINCT ', ' DROP ', ' ELSE ', ' END ', ' EXCEPTION ', ' EXCLUSIVE ', ' EXISTS ', ' FETCH ', ' FORM ', ' FOR ',\
+		' FROM ', ' GOTO ', ' GRANT ', ' GROUP ', ' HAVING ', ' IDENTIFIED ', ' IF ', ' IN ', ' INDEXES ', ' INDEX ', ' INSERT ', ' INTERSECT ', ' INTO ',\
+		' IS ', ' LIKE ', ' LOCK ', ' MINUS ', ' MODE ', ' NOCOMPRESS ', ' NOT ', ' NOWAIT ', ' NULL ', ' OF ', ' ON ', ' OPTION ', ' OR ', ' ORDER ',\
+		' OVERLAPS ', ' PRIOR ', ' PROCEDURE ', ' PUBLIC ', ' RANGE ', ' RECORD ', ' RESOURCE ', ' REVOKE ', ' SELECT ', ' SHARE ', ' SIZE ', ' SQL ',\
+		' START ', ' SUBTYPE ', ' TABAUTH ', ' TABLE ', ' THEN ', ' TO ', ' TYPE ', ' UNION ', ' UNIQUE ', ' UPDATE ', ' USE ', ' VALUES ', ' VIEW ', ' VIEWS '\
+		' WHEN ', ' WHERE ', ' WITH ', ' NATURAL ', ' JOIN ', ' INNER ', ' OUTER ']
+	for keyword in keywords:
+		if (keyword in text.upper()):
+			return keyword
+	return ''
+
+# Add an image URL to the database
+# Param: request - HTTP client request
+# Returns an HTTP response
+def add_image_url(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	url = request.GET.get('url', '')
+	try:
+		int(easting)
+		int(northing)
+		int(sample)
+		int(context)
+	except ValueError:
+		return HttpResponse("Error: One or more location parameters are invalid", content_type = 'text/plain')
+	path = easting + "/" + northing + "/" + context + "/" + sample
+	if (url.length() > 100):
+		return HttpResponse("Error: URL is longer than 100 characters", content_type = 'text/plain')
+	elif (path not in url):
+		return HttpResponse("Error: URL not to proper S3 location", content_type = 'text/plain')
+	keyword = find_sql_keyword(url)
+	if (keyword != ''):
+		return HttpResponse("Error: Given URL contain SQL keyword " + keyword, content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "INSERT INTO ImageURLs VALUES (" + easting + ", " + northing + ", " + context + ", " + sample + ", " + url + ");"
+	response = None
+	try:
+		cursor.execute(query)
+		# Make sure the query updated a row
+		if (cursor.rowcount == 1):
+			response = HttpResponse("Update successful", content_type = 'text/plain')
+		connection.commit()
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Error: ImageURLs table not found", content_type = "text/plain")
+	finally:
+		cursor.close()
+		connection.close()
+		return response
+
+# Retrieve an object's image URLs
+# Param: request - HTTP client request
+# Returns an HTTP response
+def get_image_urls(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	try:
+		int(easting)
+		int(northing)
+		int(sample)
+		int(context)
+	except ValueError:
+		return HttpResponse("Error: One or more location parameters are invalid", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT url FROM ImageURLs WHERE area_easting = " + easting + " AND area_northing = " + northing + " AND context_number = " + context
+	query = query + " AND sample_number = " + sample + ";"
+	response = "urls"
+	found = False
+	for url in cursor.fetchall():
+		# Python thinks url is a 1 element record
+		response = response + "\n" + url[0]
+		found = True
+	if (not found):
+		response = 'Error: No urls with area_easting = ' + easting + ', area_northing = ' + northing
+		response = response + ', context_number = ' + context + ', and sample_number = ' + sample + ' found in ImageURLs table'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
