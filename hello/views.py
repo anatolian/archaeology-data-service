@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 import psycopg2
 import os
-from boto.s3.connection import S3Connection
+# from boto.s3.connection import S3Connection
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
