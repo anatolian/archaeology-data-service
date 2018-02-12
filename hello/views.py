@@ -15,7 +15,7 @@ database = os.environ['postgres-database']
 aws_username = os.environ['AWS_ACCESS_KEY_ID']
 aws_password = os.environ['AWS_SECRET_ACCESS_KEY']
 bucket_name = os.environ['S3_BUCKET_NAME']
-app = Flask(__name__)
+# app = Flask(__name__)
 
 # Route for adding image to S3
 # Returns an HTML render
@@ -351,6 +351,6 @@ def get_property(request):
 	connection.close()
 	return HttpResponse("", content_type = 'text/plain')
 
-if __name__ == '__main__':
-	port = int(os.environ.get('PORT', 5000))
-	app.run(host = '0.0.0.0', port = port)
+# if __name__ == '__main__':
+# 	port = int(os.environ.get('PORT', 5000))
+# 	app.run(host = '0.0.0.0', port = port)
