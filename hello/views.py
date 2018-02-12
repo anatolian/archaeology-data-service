@@ -2,6 +2,7 @@
 # Author: Christopher Besser
 from django.shortcuts import render
 from django.http import HttpResponse
+from django.db import transaction
 import psycopg2
 import os
 # from boto.s3.connection import S3Connection
@@ -255,33 +256,23 @@ def find_sql_keyword(text):
 			return keyword
 	return ''
 
-# Add an image URL to the database
+# Add a key-value pair to the properties table
 # Param: request - HTTP client request
 # Returns an HTTP response
-def add_image_url(request):
-	easting = request.GET.get('easting', '')
-	northing = request.GET.get('northing', '')
-	context = request.GET.get('context', '')
-	sample = request.GET.get('sample', '')
-	url = request.GET.get('url', '')
-	try:
-		int(easting)
-		int(northing)
-		int(sample)
-		int(context)
-	except ValueError:
-		return HttpResponse("Error: One or more location parameters are invalid", content_type = 'text/plain')
-	path = easting + "/" + northing + "/" + context + "/" + sample
-	if (url.length() > 100):
-		return HttpResponse("Error: URL is longer than 100 characters", content_type = 'text/plain')
-	elif (path not in url):
-		return HttpResponse("Error: URL not to proper S3 location", content_type = 'text/plain')
-	keyword = find_sql_keyword(url)
-	if (keyword != ''):
-		return HttpResponse("Error: Given URL contain SQL keyword " + keyword, content_type = 'text/plain')
+def add_property(request):
+	key = request.GET.get('key', '')
+	value = request.GET.get('value', '')
+	if (len(key) > 40 or len(value) > 100):
+		return HttpResponse("Error: Max Key length = 40, Max Value length = 100", content_type = 'text/plain')
+	keySQL = find_sql_keyword(key)
+	valueSQL = find_sql_keyword(value)
+	if (keySQL != ''):
+		return HttpResponse("Error: SQL Keyword " + keySQL + " found in key", content_type = 'text/plain')
+	elif (valueSQL != ''):
+		return HttpResponse("Error: SQL Keyword " + valueSQL + " found in value", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO ImageURLs VALUES (" + easting + ", " + northing + ", " + context + ", " + sample + ", " + url + ");"
+	query = "INSERT INTO Properties VALUES (\'" + key + "\', \'" + value + "\');"
 	response = None
 	try:
 		cursor.execute(query)
@@ -290,40 +281,37 @@ def add_image_url(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Error: ImageURLs table not found", content_type = "text/plain")
+		query = "UPDATE Properties SET value = \'" + value + "\' WHERE label = \'" + key + "\';"
+		connection.rollback()
+		try:
+			cursor.execute(query)
+			# Make sure the query updated a row
+			if (cursor.rowcount == 1):
+				response = HttpResponse("Update successful", content_type = 'text/plain')
+			connection.commit()
+		except (Exception, psycopg2.DatabaseError) as error2:
+			response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
 		return response
 
-# Retrieve an object's image URLs
-# Param: request - HTTP client request
+# Get a property from the Properties table
+# Param: request - HTTP client Request
 # Returns an HTTP response
-def get_image_urls(request):
-	easting = request.GET.get('easting', '')
-	northing = request.GET.get('northing', '')
-	context = request.GET.get('context', '')
-	sample = request.GET.get('sample', '')
-	try:
-		int(easting)
-		int(northing)
-		int(sample)
-		int(context)
-	except ValueError:
-		return HttpResponse("Error: One or more location parameters are invalid", content_type = 'text/plain')
+def get_property(request):
+	key = request.GET.get('key', '')
+	keyword = find_sql_keyword(key)
+	if (keyword != ''):
+		return HttpResponse("Error: SQL Keyword " + keyword + " found in key", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT url FROM ImageURLs WHERE area_easting = " + easting + " AND area_northing = " + northing + " AND context_number = " + context
-	query = query + " AND sample_number = " + sample + ";"
-	response = "urls"
-	found = False
-	for url in cursor.fetchall():
-		# Python thinks url is a 1 element record
-		response = response + "\n" + url[0]
-		found = True
-	if (not found):
-		response = 'Error: No urls with area_easting = ' + easting + ', area_northing = ' + northing
-		response = response + ', context_number = ' + context + ', and sample_number = ' + sample + ' found in ImageURLs table'
+	query = "SELECT value FROM Properties WHERE label = \'" + key + "\';"
+	cursor.execute(query)
+	# There should only be one element in this cursor
+	for values in cursor.fetchall():
+		return HttpResponse(str(values[0]))
+		# Skipping area_easting, area_northing, context_number, sample_number, and status
 	cursor.close()
 	connection.close()
-	return HttpResponse(response, content_type = 'text/plain')
+	return HttpResponse("", content_type = 'text/plain')

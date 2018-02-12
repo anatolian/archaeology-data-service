@@ -12,6 +12,6 @@ urlpatterns = [
     url(r'^get_sample_numbers', hello.views.get_sample_numbers, name = 'get_sample_numbers'),
     url(r'^get_sample', hello.views.get_sample, name = 'get_sample'),
     url(r'^set_weight', hello.views.set_weight, name = 'set_weight'),
-    url(r'^add_image_url', hello.views.add_image_url, name = 'add_image_url'),
-    url(r'^get_image_urls', hello.views.get_image_urls, name = 'get_image_urls')
+    url(r'^add_property', hello.views.add_property, name = 'add_property'),
+    url(r'^get_property', hello.views.get_property, name = 'get_property')
 ]

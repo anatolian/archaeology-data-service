@@ -31,12 +31,9 @@ INSERT INTO Areas VALUES (10, 20, '10.20', 'active');
 INSERT INTO Areas VALUES (11, 21, '11.21', 'active');
 INSERT INTO Areas VALUES (30, 40, '30.40', 'active');
 INSERT INTO Areas VALUES (50, 60, '50.60', 'active');
-DROP TABLE IF EXISTS ImageURLs;
-CREATE TABLE ImageURLs (
-    area_easting INTEGER,
-    area_northing INTEGER,
-    context_number INTEGER,
-    sample_number INTEGER,
-    url VARCHAR(100),
-    PRIMARY KEY(area_easting, area_northing, context_number, sample_number, url)
+DROP TABLE IF EXISTS Properties;
+CREATE TABLE Properties (
+    label VARCHAR(40),
+    value VARCHAR(100),
+    PRIMARY KEY(label)
 );
