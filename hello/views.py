@@ -1,6 +1,6 @@
 # Simple webapp views for Archaeology Django service
 # Author: Christopher Besser
-from django.shortcuts import render, render_to_response
+from django.shortcuts import render
 from django.http import HttpResponse
 from django.db import transaction
 from django.template import RequestContext
@@ -20,7 +20,7 @@ bucket_name = os.environ['S3_BUCKET_NAME']
 # Param: request - HTTP client request
 # Returns an HTML render
 def add_image(request):
-	return render_to_response('upload_image.html', context_instance = RequestContext(request))
+	return render(request, 'upload_image.html')
 
 # Sign s3 request
 # Param: request - HTTP client request
