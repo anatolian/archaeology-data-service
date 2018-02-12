@@ -8,6 +8,10 @@
 		<img id = "preview" src = "/static/lang-logo.png"/>
 		<form method = "POST" action = "/submit_form/">{% csrf_token %}
 			<input type = "hidden" id = "image-url" name = "image-url" value = "/static/lang-logo.png">
+			<input type = "hidden" id = "easting" name = "easting" value = {{easting}}/>
+			<input type = "hidden" id = "northing" name = "northing" value = {{northing}}/>
+			<input type = "hidden" id = "context" name = "context" value = {{context}}/>
+			<input type = "hidden" id = "sample" name = "sample" value = {{sample}}/>
 			<input type = "submit" value = "Update Image">
 		</form>
 		<script type="text/javascript">
@@ -47,7 +51,7 @@
 		     */
 		    function getSignedRequest(file) {
 			    const xhr = new XMLHttpRequest();
-			    xhr.open('GET', '/sign-s3/?file-name=${file.name}&file-type=${file.type}');
+			    xhr.open('GET', '/sign_s3/?file-name=${easting}%2F${northing}%2F${context}%2F${sample}%2F${file.name}&file-type=${file.type}');
 			    xhr.onreadystatechange = () => {
 				    if (xhr.readyState === 4) {
 					    if (xhr.status === 200) {

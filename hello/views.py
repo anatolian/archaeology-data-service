@@ -1,6 +1,6 @@
 # Simple webapp views for Archaeology Django service
 # Author: Christopher Besser
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from django.db import transaction
 from django.template import RequestContext
@@ -19,7 +19,27 @@ bucket_name = os.environ['S3_BUCKET_NAME']
 # Param: request - HTTP client request
 # Returns an HTML render
 def add_image(request):
-	return render(request, 'upload_image.html')
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	try:
+		int(easting)
+	except ValueError:
+		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
+	try:
+		int(northing)
+	except ValueError:
+		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
+	try:
+		int(context)
+	except ValueError:
+		return HttpResponse('<h3>Provided context_number is not a number</h3>', content_type = 'text/html')
+	try:
+		int(sample)
+	except ValueError:
+		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
+	return render(request, 'upload_image.html', {'easting': easting, 'northing': northing, 'context': context, 'sample': sample})
 
 # Sign s3 request
 # Param: request - HTTP client request
