@@ -8,7 +8,9 @@ You will need the following installed on your machine:
 	Python 3.6+ (preferably the newest version in case dependencies become depricated)
 	PostgreSQL
 	pip
-	boto3 (pip install boto3)
+	boto3
+		pip install boto3 (for localhost deployment)
+		heroku run pip install boto3 (for Heroku deployment)
 	flask (pip install flask)
 	django (pip install django)
 

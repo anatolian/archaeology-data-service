@@ -20,8 +20,37 @@ app = Flask(__name__)
 @app.route("/add_image/")
 # Route for adding image to S3
 # Returns an HTML render
-def account():
-    return render_template('account.html')
+def add_image():
+    return render_template('upload_image.html')
+
+@app.route('/sign_s3/')
+# Sign s3 request
+# Returns the response dump
+def sign_s3():
+  	S3_BUCKET = os.environ.get('S3_BUCKET')
+	file_name = request.args.get('file_name')
+	file_type = request.args.get('file_type')
+	s3 = boto3.client('s3')
+	presigned_post = s3.generate_presigned_post(Bucket = S3_BUCKET_NAME, Key = file_name,
+	    Fields = {"acl": "public-read", "Content-Type": file_type},
+	    Conditions = [
+	   		{"acl": "public-read"},
+		    {"Content-Type": file_type}
+	    ],
+	    ExpiresIn = 3600
+	)
+	return json.dumps({
+	    'data': presigned_post,
+	    'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET_NAME, file_name)
+	})
+
+@app.route("/submit_form/", methods = ["POST"])
+# Submit POST request to S3
+# Returns an HTTP redirect
+def submit_form():
+	# image_url = request.form["image-url"]
+	# update_account(image_url)
+	return redirect(url_for('profile'))
 
 # Main page
 # Param: request - HTTP client request
