@@ -6,8 +6,7 @@
 		<input type = "file" id = "file_input"/>
 		<p id = "status">Please select a file</p>
 		<img id = "preview" src = "/static/lang-logo.png"/>
-
-		<form method = "POST" action = "/submit_form/">
+		<form method = "POST" action = "/submit_form/">{% csrf_token %}
 			<input type = "hidden" id = "image-url" name = "image-url" value = "/static/lang-logo.png">
 			<input type = "submit" value = "Update Image">
 		</form>
@@ -31,7 +30,7 @@
 				    if (xhr.readyState === 4) {
 					    if (xhr.status === 200 || xhr.status === 204) {
 						    document.getElementById('preview').src = url;
-						    document.getElementById('avatar-url').value = url;
+						    document.getElementById('image-url').value = url;
 					    }
 					    else {
 					    	alert('Could not upload file.');
