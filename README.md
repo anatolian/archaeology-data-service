@@ -5,7 +5,7 @@ Additionally, you will need to create an Amazon S3 bucket to store images onto.
 
 ## Dependencies
 You will need the following installed on your machine:
-	Python 3.6+
+	Python 3.6+ (preferably the newest version in case dependencies become depricated)
 	PostgreSQL
 	pip
 	boto3 (pip install boto3)
