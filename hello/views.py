@@ -4,15 +4,28 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db import transaction
 import psycopg2
-import os
-# from boto.s3.connection import S3Connection
+import os, json, boto3
+from flask import Flask, render_template, request, redirect, url_for
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
 username = os.environ['postgres-username']
 password = os.environ['postgres-password']
 database = os.environ['postgres-database']
-# s3 = S3Connection(os.environ['S3_KEY'], os.environ['S3_SECRET'])
+aws_username = os.environ['AWS_ACCESS_KEY_ID']
+aws_password = os.environ['AWS_SECRET_ACCESS_KEY']
+bucket_name = os.environ['S3_BUCKET_NAME']
+app = Flask(__name__)
+if __name__ == '__main__':
+	port = int(os.environ.get('PORT', 5000))
+	app.run(host = '0.0.0.0', port = port)
+
+@app.route("/add_image/")
+# Route for adding image to S3
+# Returns an HTML render
+def account():
+    return render_template('account.html')
+
 # Main page
 # Param: request - HTTP client request
 # Returns an HTML render
