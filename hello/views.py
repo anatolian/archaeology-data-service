@@ -6,7 +6,6 @@ from django.db import transaction
 from django.template import RequestContext
 import psycopg2
 import os, json, boto3
-from flask import Flask, render_template, request, redirect, url_for
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
@@ -26,8 +25,8 @@ def add_image(request):
 # Param: request - HTTP client request
 # Returns the response dump
 def sign_s3(request):
-	file_name = request.args.get('file_name')
-	file_type = request.args.get('file_type')
+	file_name = request.GET.get('file_name')
+	file_type = request.GET.get('file_type')
 	s3 = boto3.client('s3')
 	presigned_post = s3.generate_presigned_post(Bucket = bucket_name, Key = file_name,
 		Fields = {"acl": "public-read", "Content-Type": file_type},
@@ -46,9 +45,7 @@ def sign_s3(request):
 # Param: request - HTTP client request
 # Returns an HTTP redirect
 def submit_form(request):
-	# image_url = request.form["image-url"]
-	# update_account(image_url)
-	return redirect(url_for('profile'))
+	return redirect(request.POST.get('image-url'))
 
 # Main page
 # Param: request - HTTP client request
