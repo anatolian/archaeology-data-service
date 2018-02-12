@@ -15,13 +15,11 @@ database = os.environ['postgres-database']
 aws_username = os.environ['AWS_ACCESS_KEY_ID']
 aws_password = os.environ['AWS_SECRET_ACCESS_KEY']
 bucket_name = os.environ['S3_BUCKET_NAME']
-app = Flask(__name__)
-app.debug=True
 # Route for adding image to S3
 # Param: request - HTTP client request
 # Returns an HTML render
 def add_image(request):
-	return render_template('upload_image.html')
+	return render(request, 'upload_image.html')
 
 # Sign s3 request
 # Param: request - HTTP client request
