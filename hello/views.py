@@ -15,16 +15,16 @@ database = os.environ['postgres-database']
 aws_username = os.environ['AWS_ACCESS_KEY_ID']
 aws_password = os.environ['AWS_SECRET_ACCESS_KEY']
 bucket_name = os.environ['S3_BUCKET_NAME']
-# app = Flask(__name__)
-
 # Route for adding image to S3
+# Param: request - HTTP client request
 # Returns an HTML render
-def add_image():
+def add_image(request):
 	return render_template('upload_image.html')
 
 # Sign s3 request
+# Param: request - HTTP client request
 # Returns the response dump
-def sign_s3():
+def sign_s3(request):
 	file_name = request.args.get('file_name')
 	file_type = request.args.get('file_type')
 	s3 = boto3.client('s3')
@@ -42,8 +42,9 @@ def sign_s3():
 	})
 
 # Submit POST request to S3
+# Param: request - HTTP client request
 # Returns an HTTP redirect
-def submit_form():
+def submit_form(request):
 	# image_url = request.form["image-url"]
 	# update_account(image_url)
 	return redirect(url_for('profile'))
@@ -350,7 +351,3 @@ def get_property(request):
 	cursor.close()
 	connection.close()
 	return HttpResponse("", content_type = 'text/plain')
-
-# if __name__ == '__main__':
-# 	port = int(os.environ.get('PORT', 5000))
-# 	app.run(host = '0.0.0.0', port = port)
