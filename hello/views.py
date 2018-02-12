@@ -4,7 +4,7 @@ from django.shortcuts import render
 from django.http import HttpResponse
 from django.db import transaction
 import psycopg2
-import os, json, boto3
+import os, json#, boto3
 from flask import Flask, render_template, request, redirect, url_for
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
@@ -30,19 +30,19 @@ def sign_s3():
 	S3_BUCKET = os.environ.get('S3_BUCKET')
 	file_name = request.args.get('file_name')
 	file_type = request.args.get('file_type')
-	s3 = boto3.client('s3')
-	presigned_post = s3.generate_presigned_post(Bucket = S3_BUCKET_NAME, Key = file_name,
-		Fields = {"acl": "public-read", "Content-Type": file_type},
-		Conditions = [
-			{"acl": "public-read"},
-			{"Content-Type": file_type}
-		],
-		ExpiresIn = 3600
-	)
-	return json.dumps({
-		'data': presigned_post,
-		'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET_NAME, file_name)
-	})
+	# s3 = boto3.client('s3')
+	# presigned_post = s3.generate_presigned_post(Bucket = S3_BUCKET_NAME, Key = file_name,
+	# 	Fields = {"acl": "public-read", "Content-Type": file_type},
+	# 	Conditions = [
+	# 		{"acl": "public-read"},
+	# 		{"Content-Type": file_type}
+	# 	],
+	# 	ExpiresIn = 3600
+	# )
+	# return json.dumps({
+	# 	'data': presigned_post,
+	# 	'url': 'https://%s.s3.amazonaws.com/%s' % (S3_BUCKET_NAME, file_name)
+	# })
 
 @app.route("/submit_form/", methods = ["POST"])
 # Submit POST request to S3
