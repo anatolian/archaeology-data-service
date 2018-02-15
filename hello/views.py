@@ -43,41 +43,45 @@ def add_image(request):
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
 	sample = request.GET.get('sample', '')
-	image = request.GET.get('image', '')
 	file_name = request.GET.get('file_name')
 	keyword = find_sql_keyword(file_name)
 	try:
 		int(easting)
 	except ValueError:
-		return HttpResponse('<h3>Provided area easting is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
 	try:
 		int(northing)
 	except ValueError:
-		return HttpResponse('<h3>Provided area northing is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
 	try:
 		int(context)
 	except ValueError:
-		return HttpResponse('<h3>Provided context number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided context number is not a number', content_type = 'text/plain')
 	try:
 		int(sample)
 	except ValueError:
-		return HttpResponse('<h3>Provided sample number is not a number</h3>', content_type = 'text/html')
-	try:
-		int(image)
-	except ValueError:
-		return HttpResponse('<h3>Provided image number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
 	if (keyword != ''):
-		return HttpResponse('<h3>SQL keyword ' + keyword + ' not allowed in file_name</h3>', content_type = 'text/html')
+		return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
 	s3 = boto3.resource('s3')
-	path = easting + '/' + northing + '/' + context + '/' + sample + '/' + image + '_' + file_name
+	path = easting + '/' + northing + '/' + context + '/' + sample + '/'
 	try:
+		imageNumber = 0
+		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+			number = int(file.key[:file.key.find('.')])
+			if (imageNumber < number):
+				imageNumber = number
+		# If the directory does not exist, will be added and count starts at 1
+		path = path + str(imageNumber + 1) + file_name[file_name.find('.'):]
 		data = open(file_name, 'rb')
-		s3.Bucket('pennmuseum').put_object(Key = path, Body = data)
+		s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
 	except FileNotFoundError:
-		return HttpResponse('<h3>File ' + file_name + ' could not be found</h3>', content_type = 'text/html')
+		return HttpResponse('File ' + file_name + ' could not be found', content_type = 'text/plain')
 	except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-		return HttpResponse("<h3>Error: Insertion failed " + error.pgerror + "</h3>", content_type = "text/plain")
-	return HttpResponse("<h3>File uploaded successfully</h3>", content_type = 'text/plain')
+		return HttpResponse("Error: Insertion failed " + error.pgerror, content_type = "text/plain")
+	except (Exception, botocore.exceptions.ClientError):
+		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+	return HttpResponse("File uploaded successfully", content_type = 'text/plain')
 
 # Main page
 # Param: request - HTTP client request
@@ -99,7 +103,7 @@ def relations(request):
 		# Python thinks this is a tuple of 1 element
 		response = response + "\n" + relname[0]
 	if (not found):
-		response = 'Your database is empty. Modify initialization.sql to manually insert values, or import data from another database'
+		response = 'Error: database is empty'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
@@ -236,19 +240,19 @@ def get_sample(request):
 	try:
 		int(easting)
 	except ValueError:
-		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided area_easting is not a number', content_type = 'text/plain')
 	try:
 		int(northing)
 	except ValueError:
-		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided area_northing is not a number', content_type = 'text/plain')
 	try:
 		int(context)
 	except ValueError:
-		return HttpResponse('<h3>Provided context_number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('Provided context_number is not a number', content_type = 'text/plain')
 	try:
 		int(sample)
 	except ValueError:
-		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>Provided sample_number is not a number', content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = " + easting + " AND area_northing = " + northing
@@ -361,7 +365,7 @@ def get_property(request):
 	for values in cursor.fetchall():
 		cursor.close()
 		connection.close()
-		return HttpResponse(str(values[0]))
+		return HttpResponse(str(values[0]), content_type = 'text/plain')
 	# If these lines are reached then the property must not exist
 	cursor.close()
 	connection.close()
