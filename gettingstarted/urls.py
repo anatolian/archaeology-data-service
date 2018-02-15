@@ -14,7 +14,5 @@ urlpatterns = [
     url(r'^set_weight', hello.views.set_weight, name = 'set_weight'),
     url(r'^add_property', hello.views.add_property, name = 'add_property'),
     url(r'^get_property', hello.views.get_property, name = 'get_property'),
-    url(r'^add_image', hello.views.add_image, name = 'add_image'),
-    url(r'^sign_s3', hello.views.sign_s3, name = 'sign_s3'),
-    url(r'^submit_form', hello.views.submit_form, name = 'submit_form')
+    url(r'^add_image', hello.views.add_image, name = 'add_image')
 ]
