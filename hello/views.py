@@ -68,7 +68,7 @@ def add_image(request):
 	try:
 		imageNumber = 0
 		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			number = int(file.key[:file.key.find('.')])
+			number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
 			if (imageNumber < number):
 				imageNumber = number
 		# If the directory does not exist, will be added and count starts at 1
