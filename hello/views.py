@@ -6,15 +6,36 @@ from django.db import transaction
 from django.template import RequestContext
 import psycopg2
 import os, json, boto3
+from aws_settings import *
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
 username = os.environ['postgres-username']
 password = os.environ['postgres-password']
 database = os.environ['postgres-database']
-aws_username = os.environ['AWS_ACCESS_KEY_ID']
-aws_password = os.environ['AWS_SECRET_ACCESS_KEY']
-bucket_name = os.environ['S3_BUCKET_NAME']
+AWS_QUERYSTRING_AUTH = False
+AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+MEDIA_URL = 'http://%s.s3.amazonaws.com/images/' % AWS_STORAGE_BUCKET_NAME
+DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+# Detect SQL keywords in a string
+# Param: text - string to search
+# Returns the found keyword, if any
+def find_sql_keyword(text):
+	keywords = [' ALL ', ' ALTER ', ' AND ', ' ANY ', ' ARRAY ', ' ARROW ', ' AS ', ' ASC ', ' AT ', ' BEGIN ', ' BETWEEN ', ' BY ', ' CASE ', ' CHECK ',\
+		' CLUSTERS ', ' CLUSTER ', ' COLAUTH ', ' COLUMNS ', ' COMPRESS ', ' CONNECT ', ' CRASH ', ' CREATE ', ' CURRENT ', ' DECIMAL ', ' DECLARE ',\
+		' DEFAULT ', ' DELETE ', ' DESC ', ' DISTINCT ', ' DROP ', ' ELSE ', ' END ', ' EXCEPTION ', ' EXCLUSIVE ', ' EXISTS ', ' FETCH ', ' FORM ', ' FOR ',\
+		' FROM ', ' GOTO ', ' GRANT ', ' GROUP ', ' HAVING ', ' IDENTIFIED ', ' IF ', ' IN ', ' INDEXES ', ' INDEX ', ' INSERT ', ' INTERSECT ', ' INTO ',\
+		' IS ', ' LIKE ', ' LOCK ', ' MINUS ', ' MODE ', ' NOCOMPRESS ', ' NOT ', ' NOWAIT ', ' NULL ', ' OF ', ' ON ', ' OPTION ', ' OR ', ' ORDER ',\
+		' OVERLAPS ', ' PRIOR ', ' PROCEDURE ', ' PUBLIC ', ' RANGE ', ' RECORD ', ' RESOURCE ', ' REVOKE ', ' SELECT ', ' SHARE ', ' SIZE ', ' SQL ',\
+		' START ', ' SUBTYPE ', ' TABAUTH ', ' TABLE ', ' THEN ', ' TO ', ' TYPE ', ' UNION ', ' UNIQUE ', ' UPDATE ', ' USE ', ' VALUES ', ' VIEW ', ' VIEWS '\
+		' WHEN ', ' WHERE ', ' WITH ', ' NATURAL ', ' JOIN ', ' INNER ', ' OUTER ']
+	for keyword in keywords:
+		if (keyword in text.upper()):
+			return keyword
+	return ''
+
 # Route for adding image to S3
 # Param: request - HTTP client request
 # Returns an HTML render
@@ -23,6 +44,8 @@ def add_image(request):
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
 	sample = request.GET.get('sample', '')
+	file_name = request.GET.get('file_name')
+	keyword1 = find_sql_keyword(file_name)
 	try:
 		int(easting)
 	except ValueError:
@@ -39,33 +62,13 @@ def add_image(request):
 		int(sample)
 	except ValueError:
 		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
-	return render(request, 'upload_image.html', {'easting': easting, 'northing': northing, 'context': context, 'sample': sample})
-
-# Sign s3 request
-# Param: request - HTTP client request
-# Returns the response dump
-def sign_s3(request):
-	file_name = request.GET.get('file_name')
-	file_type = request.GET.get('file_type')
-	s3 = boto3.client('s3')
-	presigned_post = s3.generate_presigned_post(Bucket = bucket_name, Key = file_name,
-		Fields = {"acl": "public-read", "Content-Type": file_type},
-		Conditions = [
-			{"acl": "public-read"},
-			{"Content-Type": file_type}
-		],
-		ExpiresIn = 3600
-	)
-	return json.dumps({
-		'data': presigned_post,
-		'url': 'https://%s.s3.amazonaws.com/%s' % (bucket_name, file_name)
-	})
-
-# Submit POST request to S3
-# Param: request - HTTP client request
-# Returns an HTTP redirect
-def submit_form(request):
-	return redirect(request.POST.get('image-url'))
+	if (keyword1 != ''):
+		return HttpResponse('<h3>SQL keyword ' + keyword1 + ' not allowed in file_name</h3>', content_type = 'text/html')
+	s3 = boto3.resource('s3')
+	response = ""
+	for bucket in s3.buckets.all():
+		response = response + bucket.name + "\n"
+	return HttpResponse()
 
 # Main page
 # Param: request - HTTP client request
@@ -292,23 +295,6 @@ def set_weight(request):
 		cursor.close()
 		connection.close()
 		return response
-
-# Detect SQL keywords in a string
-# Param: text - string to search
-# Returns the found keyword, if any
-def find_sql_keyword(text):
-	keywords = [' ALL ', ' ALTER ', ' AND ', ' ANY ', ' ARRAY ', ' ARROW ', ' AS ', ' ASC ', ' AT ', ' BEGIN ', ' BETWEEN ', ' BY ', ' CASE ', ' CHECK ',\
-		' CLUSTERS ', ' CLUSTER ', ' COLAUTH ', ' COLUMNS ', ' COMPRESS ', ' CONNECT ', ' CRASH ', ' CREATE ', ' CURRENT ', ' DECIMAL ', ' DECLARE ',\
-		' DEFAULT ', ' DELETE ', ' DESC ', ' DISTINCT ', ' DROP ', ' ELSE ', ' END ', ' EXCEPTION ', ' EXCLUSIVE ', ' EXISTS ', ' FETCH ', ' FORM ', ' FOR ',\
-		' FROM ', ' GOTO ', ' GRANT ', ' GROUP ', ' HAVING ', ' IDENTIFIED ', ' IF ', ' IN ', ' INDEXES ', ' INDEX ', ' INSERT ', ' INTERSECT ', ' INTO ',\
-		' IS ', ' LIKE ', ' LOCK ', ' MINUS ', ' MODE ', ' NOCOMPRESS ', ' NOT ', ' NOWAIT ', ' NULL ', ' OF ', ' ON ', ' OPTION ', ' OR ', ' ORDER ',\
-		' OVERLAPS ', ' PRIOR ', ' PROCEDURE ', ' PUBLIC ', ' RANGE ', ' RECORD ', ' RESOURCE ', ' REVOKE ', ' SELECT ', ' SHARE ', ' SIZE ', ' SQL ',\
-		' START ', ' SUBTYPE ', ' TABAUTH ', ' TABLE ', ' THEN ', ' TO ', ' TYPE ', ' UNION ', ' UNIQUE ', ' UPDATE ', ' USE ', ' VALUES ', ' VIEW ', ' VIEWS '\
-		' WHEN ', ' WHERE ', ' WITH ', ' NATURAL ', ' JOIN ', ' INNER ', ' OUTER ']
-	for keyword in keywords:
-		if (keyword in text.upper()):
-			return keyword
-	return ''
 
 # Add a key-value pair to the properties table
 # Param: request - HTTP client request
