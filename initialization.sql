@@ -19,6 +19,8 @@ INSERT INTO Samples VALUES (30, 40, 3, 4, 'clay', '10R', '5', '3', '5YR', '6', '
 INSERT INTO Samples VALUES (50, 60, 4, 5, 'ceramic', '8YR', '3', '2', '6R', '1', '1', 88, 'active');
 INSERT INTO Samples VALUES (11, 21, 1, 5, 'metal', '10R', '5', '3', '5YR', '6', '4', 123.0, 'active');
 INSERT INTO Samples VALUES (10, 20, 1, 1, 'stone', 'brown', 'light_br', 'brownish', 'red', 'light_red', 'reddish', 0.163, 'active');
+INSERT INTO Samples VALUES (11, 21, 1, 2, 'ceramic', 'green', 'yellow', 'yellow', 'orange', 'red', 'red', 0.44, 'active');
+INSERT INTO Samples VALUES (11, 21, 1, 3, 'clay', 'yellow', 'green', 'orange', 'yellow', 'red', 'red', 0.44, 'active');
 DROP TABLE IF EXISTS Areas;
 CREATE TABLE Areas (
 	area_easting INTEGER,
