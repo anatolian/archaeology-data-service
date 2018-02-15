@@ -69,7 +69,7 @@ def add_image(request):
 	if (keyword != ''):
 		return HttpResponse('<h3>SQL keyword ' + keyword + ' not allowed in file_name</h3>', content_type = 'text/html')
 	s3 = boto3.resource('s3')
-	path = easting + '/' + northing + '/' + context + '/' + sample + '/' + image + '/' + file_name
+	path = easting + '/' + northing + '/' + context + '/' + sample + '/' + image + '_' + file_name
 	try:
 		data = open(file_name, 'rb')
 		s3.Bucket('pennmuseum').put_object(Key = path, Body = data)
@@ -77,7 +77,7 @@ def add_image(request):
 		return HttpResponse('<h3>File ' + file_name + ' could not be found</h3>', content_type = 'text/html')
 	except (Exception, boto3.exceptions.S3UploadFailedError) as error:
 		return HttpResponse("<h3>Error: Insertion failed " + error.pgerror + "</h3>", content_type = "text/plain")
-	return HttpResponse(response, content_type = 'text/plain')
+	return HttpResponse("<h3>File uploaded successfully</h3>", content_type = 'text/plain')
 
 # Main page
 # Param: request - HTTP client request
