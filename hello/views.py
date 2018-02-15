@@ -78,7 +78,7 @@ def add_image(request):
 	except FileNotFoundError:
 		return HttpResponse('File ' + file_name + ' could not be found', content_type = 'text/plain')
 	except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-		return HttpResponse("Error: Insertion failed " + error.pgerror, content_type = "text/plain")
+		return HttpResponse("Error: Insertion failed", content_type = "text/plain")
 	except (Exception, botocore.exceptions.ClientError):
 		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 	return HttpResponse("File uploaded successfully", content_type = 'text/plain')
