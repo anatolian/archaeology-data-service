@@ -66,7 +66,7 @@ def add_image(request):
 		int(image)
 	except ValueError:
 		return HttpResponse('<h3>Provided image number is not a number</h3>', content_type = 'text/html')
-	if (keyword1 != ''):
+	if (keyword != ''):
 		return HttpResponse('<h3>SQL keyword ' + keyword + ' not allowed in file_name</h3>', content_type = 'text/html')
 	s3 = boto3.resource('s3')
 	response = "bucket"
