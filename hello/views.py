@@ -6,7 +6,6 @@ from django.db import transaction
 from django.template import RequestContext
 import psycopg2
 import os, json, boto3
-from aws_settings import *
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
