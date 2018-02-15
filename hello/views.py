@@ -67,7 +67,7 @@ def add_image(request):
 	response = ""
 	for bucket in s3.buckets.all():
 		response = response + bucket.name + "\n"
-	return HttpResponse()
+	return HttpResponse(response, content_type = 'text/html')
 
 # Main page
 # Param: request - HTTP client request
