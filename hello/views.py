@@ -69,10 +69,14 @@ def add_image(request):
 	if (keyword != ''):
 		return HttpResponse('<h3>SQL keyword ' + keyword + ' not allowed in file_name</h3>', content_type = 'text/html')
 	s3 = boto3.resource('s3')
-	response = "bucket"
 	path = easting + '/' + northing + '/' + context + '/' + sample + '/' + file_name
-	data = open(file_name, 'rb')
-	s3.Bucket('pennmuseum').put_object(Key = file_name, Body = data)
+	try:
+		data = open(file_name, 'rb')
+		s3.Bucket('pennmuseum').put_object(Key = file_name, Body = data)
+	except FileNotFoundError:
+		return HttpResponse('<h3>File ' + file_name + ' could not be found</h3>', content_type = 'text/html')
+	except (Exception, boto3.exceptions.S3UploadFailedError) as error:
+		return HttpResponse("<h3>Error: Insertion failed " + error.pgerror + "</h3>", content_type = "text/plain")
 	return HttpResponse(response, content_type = 'text/plain')
 
 # Main page
@@ -355,8 +359,10 @@ def get_property(request):
 	cursor.execute(query)
 	# There should only be one element in this cursor
 	for values in cursor.fetchall():
+		cursor.close()
+		connection.close()
 		return HttpResponse(str(values[0]))
-		# Skipping area_easting, area_northing, context_number, sample_number, and status
+	# If these lines are reached then the property must not exist
 	cursor.close()
 	connection.close()
-	return HttpResponse("", content_type = 'text/plain')
+	return HttpResponse("Error: Property not found", content_type = 'text/plain')
