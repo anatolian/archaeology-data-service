@@ -43,31 +43,37 @@ def add_image(request):
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
 	sample = request.GET.get('sample', '')
+	image = request.GET.get('image', '')
 	file_name = request.GET.get('file_name')
-	keyword1 = find_sql_keyword(file_name)
+	keyword = find_sql_keyword(file_name)
 	try:
 		int(easting)
 	except ValueError:
-		return HttpResponse('<h3>Provided area_easting is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>Provided area easting is not a number</h3>', content_type = 'text/html')
 	try:
 		int(northing)
 	except ValueError:
-		return HttpResponse('<h3>Provided area_northing is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>Provided area northing is not a number</h3>', content_type = 'text/html')
 	try:
 		int(context)
 	except ValueError:
-		return HttpResponse('<h3>Provided context_number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>Provided context number is not a number</h3>', content_type = 'text/html')
 	try:
 		int(sample)
 	except ValueError:
-		return HttpResponse('<h3>Provided sample_number is not a number</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>Provided sample number is not a number</h3>', content_type = 'text/html')
+	try:
+		int(image)
+	except ValueError:
+		return HttpResponse('<h3>Provided image number is not a number</h3>', content_type = 'text/html')
 	if (keyword1 != ''):
-		return HttpResponse('<h3>SQL keyword ' + keyword1 + ' not allowed in file_name</h3>', content_type = 'text/html')
+		return HttpResponse('<h3>SQL keyword ' + keyword + ' not allowed in file_name</h3>', content_type = 'text/html')
 	s3 = boto3.resource('s3')
-	response = ""
-	for bucket in s3.buckets.all():
-		response = response + bucket.name + "\n"
-	return HttpResponse(response, content_type = 'text/html')
+	response = "bucket"
+	path = easting + '/' + northing + '/' + context + '/' + sample + '/' + file_name
+	data = open(file_name, 'rb')
+	s3.Bucket('pennmuseum').put_object(Key = file_name, Body = data)
+	return HttpResponse(response, content_type = 'text/plain')
 
 # Main page
 # Param: request - HTTP client request
