@@ -74,13 +74,12 @@ def upload_file(request):
 		form = UploadFileForm(request.POST, request.FILES)
 		if (form.is_valid()):
 			# Store file to temporary location then upload to s3
-			with open('tmp/image' + file_name[file_name.find('.'):], 'wb+') as destination:
+			with open('image' + file_name[file_name.find('.'):], 'wb+') as destination:
 				for chunk in f.chunks():
 					destination.write(chunk)
-			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample + '&file_name' + file_name
+			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
+			url = url + '&file_name=image' + file_name[file_name.find('.'):]
 			return HttpResponseRedirect(url)
-	else:
-		form = UploadFileForm()
 	return HttpResponse("Error uploading image", 'text/plain')
 
 # Route for adding image to S3
