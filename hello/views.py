@@ -5,7 +5,6 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.template import RequestContext
 from django import forms
-from .forms import UploadFileForm
 import psycopg2
 import os, json, boto3
 # For local deployment, these should be defined in system environment variables.
