@@ -1,9 +1,11 @@
 # Simple webapp views for Archaeology Django service
 # Author: Christopher Besser
 from django.shortcuts import render, redirect
-from django.http import HttpResponse
+from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.template import RequestContext
+from django import forms
+from .forms import UploadFileForm
 import psycopg2
 import os, json, boto3
 # For local deployment, these should be defined in system environment variables.
@@ -35,6 +37,53 @@ def find_sql_keyword(text):
 			return keyword
 	return ''
 
+# File to upload
+# Param: form - POST form containing the file
+class UploadFileForm(forms.Form):
+    title = forms.CharField(max_length = 50)
+    file = forms.FileField()
+
+# Upload a file to Heroku
+# Param: request - POST request containing file
+# Returns an http response
+def upload_file(request):
+    if (request.method == 'POST'):
+    	easting = request.POST.get('easting', '')
+		northing = request.POST.get('northing', '')
+		context = request.POST.get('context', '')
+		sample = request.POST.get('sample', '')
+		file_name = request.POST.get('file_name', '')
+		keyword = find_sql_keyword(file_name)
+		try:
+			int(easting)
+		except ValueError:
+			return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
+		try:
+			int(northing)
+		except ValueError:
+			return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
+		try:
+			int(context)
+		except ValueError:
+			return HttpResponse('Provided context number is not a number', content_type = 'text/plain')
+		try:
+			int(sample)
+		except ValueError:
+			return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
+		if (keyword != ''):
+			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
+        form = UploadFileForm(request.POST, request.FILES)
+        if (form.is_valid()):
+        	# Store file to temporary location then upload to s3
+    		with open('tmp/image' + file_name[file_name.find('.'):], 'wb+') as destination:
+        		for chunk in f.chunks():
+            		destination.write(chunk)
+            url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample + '&file_name' + file_name
+            return HttpResponseRedirect(url)
+    else:
+        form = UploadFileForm()
+    return HttpResponse("Error uploading image", 'text/plain')
+
 # Route for adding image to S3
 # Param: request - HTTP client request
 # Returns an HTML render
@@ -43,7 +92,8 @@ def add_image(request):
 	northing = request.GET.get('northing', '')
 	context = request.GET.get('context', '')
 	sample = request.GET.get('sample', '')
-	file_name = request.GET.get('file_name')
+	file_name = request.GET.get('file_name', '')
+	# Should have already been checked but checking again in case its possible to call this method without upload_image first
 	keyword = find_sql_keyword(file_name)
 	try:
 		int(easting)
