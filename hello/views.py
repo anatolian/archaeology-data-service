@@ -47,8 +47,8 @@ class UploadFileForm(forms.Form):
 # Param: request - POST request containing file
 # Returns an http response
 def upload_file(request):
-    if (request.method == 'POST'):
-    	easting = request.POST.get('easting', '')
+	if (request.method == 'POST'):
+		easting = request.POST.get('easting', '')
 		northing = request.POST.get('northing', '')
 		context = request.POST.get('context', '')
 		sample = request.POST.get('sample', '')
@@ -72,17 +72,17 @@ def upload_file(request):
 			return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
 		if (keyword != ''):
 			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
-        form = UploadFileForm(request.POST, request.FILES)
-        if (form.is_valid()):
-        	# Store file to temporary location then upload to s3
-    		with open('tmp/image' + file_name[file_name.find('.'):], 'wb+') as destination:
-        		for chunk in f.chunks():
-            		destination.write(chunk)
-            url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample + '&file_name' + file_name
-            return HttpResponseRedirect(url)
-    else:
-        form = UploadFileForm()
-    return HttpResponse("Error uploading image", 'text/plain')
+		form = UploadFileForm(request.POST, request.FILES)
+		if (form.is_valid()):
+			# Store file to temporary location then upload to s3
+			with open('tmp/image' + file_name[file_name.find('.'):], 'wb+') as destination:
+				for chunk in f.chunks():
+					destination.write(chunk)
+			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample + '&file_name' + file_name
+			return HttpResponseRedirect(url)
+	else:
+		form = UploadFileForm()
+	return HttpResponse("Error uploading image", 'text/plain')
 
 # Route for adding image to S3
 # Param: request - HTTP client request
