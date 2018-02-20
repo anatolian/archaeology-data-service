@@ -133,6 +133,45 @@ def add_image(request):
 		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 	return HttpResponse("File uploaded successfully", content_type = 'text/plain')
 
+# Route for fetching image urls
+# Param request - HTTP client request
+# Returns an HTTP response
+def get_image_urls(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	context = request.GET.get('context', '')
+	sample = request.GET.get('sample', '')
+	try:
+		int(easting)
+	except ValueError:
+		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
+	try:
+		int(northing)
+	except ValueError:
+		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
+	try:
+		int(context)
+	except ValueError:
+		return HttpResponse('Provided context number is not a number', content_type = 'text/plain')
+	try:
+		int(sample)
+	except ValueError:
+		return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
+	s3 = boto3.resource('s3')
+	path = easting + '/' + northing + '/' + context + '/' + sample + '/'
+	response = '<h3>Image URLs:</h3><ul>'
+	found = False
+	try:
+		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+			response = response + "<li><a href = '" + file.key + "'>" + file.key + "</a></li>"
+			found = True
+		response = response + "</ul>"
+		if (not found):
+			return HttpResponse('<h3>No images found</h3>', 'text/html')
+		return HttpResponse(response, 'text/html')
+	except (Exception, botocore.exceptions.ClientError):
+		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+
 # Main page
 # Param: request - HTTP client request
 # Returns an HTML render

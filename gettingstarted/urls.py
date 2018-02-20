@@ -15,5 +15,6 @@ urlpatterns = [
     url(r'^add_property', hello.views.add_property, name = 'add_property'),
     url(r'^get_property', hello.views.get_property, name = 'get_property'),
     url(r'^add_image', hello.views.add_image, name = 'add_image'),
-    url(r'^upload_file', hello.views.upload_file, name = 'upload_file')
+    url(r'^upload_file', hello.views.upload_file, name = 'upload_file'),
+    url(r'^get_image_urls', hello.views.get_image_urls, name = 'get_image_urls')
 ]
