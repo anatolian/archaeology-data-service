@@ -39,12 +39,12 @@ def find_sql_keyword(text):
 # File to upload
 # Param: form - POST form containing the file
 class UploadFileForm(forms.Form):
-    easting = forms.IntegerField(min_value = 0)
-    northing = forms.IntegerField(min_value = 0)
-    context = forms.IntegerField(min_value = 0)
-    sample = forms.IntegerField(min_value = 0)
-    file_name = forms.CharField(max_length = 250)
-    myFile = forms.FileField()
+	easting = forms.IntegerField(min_value = 0)
+	northing = forms.IntegerField(min_value = 0)
+	context = forms.IntegerField(min_value = 0)
+	sample = forms.IntegerField(min_value = 0)
+	file_name = forms.CharField(max_length = 250)
+	myFile = forms.FileField()
 
 # Upload a file to Heroku
 # Param: request - POST request containing file
@@ -53,8 +53,8 @@ def upload_file(request):
 	if (request.method == 'POST'):
 		# Store file to temporary location then upload to s3
 		form = UploadFileForm(request.POST, request.FILES)
-        if form.is_valid():
-        	easting = request.POST.get('easting', '')
+		if form.is_valid():
+			easting = request.POST.get('easting', '')
 			northing = request.POST.get('northing', '')
 			context = request.POST.get('context', '')
 			sample = request.POST.get('sample', '')
@@ -300,7 +300,7 @@ def get_sample(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT * FROM Samples WHERE status = 'active' AND area_easting = " + easting + " AND area_northing = " + northing
-	query = query  + " AND context_number = " + context + " AND sample_number = " + sample + ";"
+	query = query + " AND context_number = " + context + " AND sample_number = " + sample + ";"
 	cursor.execute(query)
 	response = 'material | exterior_color_hue | exterior_color_lightness_value | exterior_color_chroma | interior_color_hue | '
 	response = response + 'interior_color_lightness_value | interior_color_chroma | weight_kilograms'
