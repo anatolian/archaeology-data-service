@@ -7,6 +7,8 @@ from django.template import RequestContext
 from django import forms
 import psycopg2
 import os, json, boto3
+import logging
+logger = logging.getLogger('testlogger')
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
 hostname = os.environ['postgres-hostname']
@@ -52,14 +54,16 @@ class UploadFileForm(forms.Form):
 def upload_file(request):
 	if (request.method == 'POST'):
 		# Store file to temporary location then upload to s3
+		logger.info('POST Detected')
 		form = UploadFileForm(request.POST, request.FILES)
 		if form.is_valid():
+			logger.info('Valid Form')
 			easting = request.POST.get('easting', '')
 			northing = request.POST.get('northing', '')
 			context = request.POST.get('context', '')
 			sample = request.POST.get('sample', '')
 			file_name = request.POST.get('file_name', '')
-			file - request.FILES.get('myFile', '');
+			file = request.FILES.get('myFile', '');
 			keyword = find_sql_keyword(file_name)
 			if (keyword != ''):
 				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
@@ -75,7 +79,9 @@ def upload_file(request):
 			url = url + '&file_name=upload/image' + file_type
 			return HttpResponseRedirect(url)
 		else:
+			logger.info('Invalid Form')
 			form = UploadFileForm()
+	logger.info('Redirecting request to blank form')
 	return render(request, 'upload_image.html', {'form': form})
 
 # Route for adding image to S3
