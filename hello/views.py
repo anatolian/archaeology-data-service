@@ -163,7 +163,7 @@ def get_image_urls(request):
 	found = False
 	try:
 		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			response = response + "<li><a href = '" + file.key + "'>" + file.key + "</a></li>"
+			response = response + "<li><a href = '" + MEDIA_URL + file.key + "'>" + file.key + "</a></li>"
 			found = True
 		response = response + "</ul>"
 		if (not found):
