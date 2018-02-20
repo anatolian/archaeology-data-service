@@ -52,6 +52,7 @@ def upload_file(request):
 		context = request.POST.get('context', '')
 		sample = request.POST.get('sample', '')
 		file_name = request.POST.get('file_name', '')
+		file - request.FILES.get('myFile', '');
 		keyword = find_sql_keyword(file_name)
 		try:
 			int(easting)
@@ -71,15 +72,18 @@ def upload_file(request):
 			return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
 		if (keyword != ''):
 			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
-		form = UploadFileForm(request.POST, request.FILES)
-		if (form.is_valid()):
-			# Store file to temporary location then upload to s3
-			with open('image' + file_name[file_name.find('.'):], 'wb+') as destination:
-				for chunk in f.chunks():
-					destination.write(chunk)
-			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
-			url = url + '&file_name=image' + file_name[file_name.find('.'):]
-			return HttpResponseRedirect(url)
+		# Store file to temporary location then upload to s3
+		file_type = file_name[file_name.find('.'):]
+		if (not os.path.exists('upload/')):
+			os.mkdir('upload/')
+		if (os.path.exists('upload/image' + file_type)):
+			os.remove('upload/image' + file_type)
+		with open('upload/image' + file_type, 'wb+') as destination:
+			for chunk in file.chunks():
+				destination.write(chunk)
+		url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
+		url = url + '&file_name=upload/image' + file_type
+		return HttpResponseRedirect(url)
 	return HttpResponse("Error uploading image", 'text/plain')
 
 # Route for adding image to S3
