@@ -4,10 +4,9 @@
 <html>
 	<body>
 		<input type = "file" id = "file_input"/>
-		<p id = "status">Please select a file</p>
-		<img id = "preview" src = "/static/lang-logo.png"/>
 		<form method = "POST" action = "/submit_form/">{% csrf_token %}
-			<input type = "hidden" id = "image-url" name = "image-url" value = "/static/lang-logo.png">
+			<input type = "hidden" id = "myFile" name = "myFile" value = "{{myFile}}"/>
+			<input type = "hidden" id = "file_name" name = "file_name" value = "{{file_name}}"/>
 			<input type = "hidden" id = "easting" name = "easting" value = {{easting}}/>
 			<input type = "hidden" id = "northing" name = "northing" value = {{northing}}/>
 			<input type = "hidden" id = "context" name = "context" value = {{context}}/>

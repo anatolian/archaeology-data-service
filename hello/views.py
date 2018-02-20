@@ -39,52 +39,44 @@ def find_sql_keyword(text):
 # File to upload
 # Param: form - POST form containing the file
 class UploadFileForm(forms.Form):
-    title = forms.CharField(max_length = 50)
-    file = forms.FileField()
+    easting = forms.IntegerField(min_value = 0)
+    northing = forms.IntegerField(min_value = 0)
+    context = forms.IntegerField(min_value = 0)
+    sample = forms.IntegerField(min_value = 0)
+    file_name = forms.CharField(max_length = 250)
+    myFile = forms.FileField()
 
 # Upload a file to Heroku
 # Param: request - POST request containing file
 # Returns an http response
 def upload_file(request):
 	if (request.method == 'POST'):
-		easting = request.POST.get('easting', '')
-		northing = request.POST.get('northing', '')
-		context = request.POST.get('context', '')
-		sample = request.POST.get('sample', '')
-		file_name = request.POST.get('file_name', '')
-		file - request.FILES.get('myFile', '');
-		keyword = find_sql_keyword(file_name)
-		try:
-			int(easting)
-		except ValueError:
-			return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
-		try:
-			int(northing)
-		except ValueError:
-			return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
-		try:
-			int(context)
-		except ValueError:
-			return HttpResponse('Provided context number is not a number', content_type = 'text/plain')
-		try:
-			int(sample)
-		except ValueError:
-			return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
-		if (keyword != ''):
-			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
 		# Store file to temporary location then upload to s3
-		file_type = file_name[file_name.find('.'):]
-		if (not os.path.exists('upload/')):
-			os.mkdir('upload/')
-		if (os.path.exists('upload/image' + file_type)):
-			os.remove('upload/image' + file_type)
-		with open('upload/image' + file_type, 'wb+') as destination:
-			for chunk in file.chunks():
-				destination.write(chunk)
-		url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
-		url = url + '&file_name=upload/image' + file_type
-		return HttpResponseRedirect(url)
-	return HttpResponse("Error uploading image", 'text/plain')
+		form = UploadFileForm(request.POST, request.FILES)
+        if form.is_valid():
+        	easting = request.POST.get('easting', '')
+			northing = request.POST.get('northing', '')
+			context = request.POST.get('context', '')
+			sample = request.POST.get('sample', '')
+			file_name = request.POST.get('file_name', '')
+			file - request.FILES.get('myFile', '');
+			keyword = find_sql_keyword(file_name)
+			if (keyword != ''):
+				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
+			file_type = file_name[file_name.find('.'):]
+			if (not os.path.exists('upload/')):
+				os.mkdir('upload/')
+			if (os.path.exists('upload/image' + file_type)):
+				os.remove('upload/image' + file_type)
+			with open('upload/image' + file_type, 'wb+') as destination:
+				for chunk in file.chunks():
+					destination.write(chunk)
+			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
+			url = url + '&file_name=upload/image' + file_type
+			return HttpResponseRedirect(url)
+		else:
+			form = UploadFileForm()
+	return render(request, 'upload_image.html', {'form': form})
 
 # Route for adding image to S3
 # Param: request - HTTP client request
