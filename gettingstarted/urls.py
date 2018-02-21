@@ -5,15 +5,15 @@ from django.urls import path
 import hello.views
 urlpatterns = [
     url(r'^$', hello.views.index, name = 'index'),
-    url(r'^relations', hello.views.relations, name = 'relations'),
-    url(r'^get_area_eastings', hello.views.get_area_eastings, name = 'get_area_eastings'),
-    url(r'^get_area_northings', hello.views.get_area_northings, name = 'get_area_northings'),
-    url(r'^get_context_numbers', hello.views.get_context_numbers, name = 'get_context_numbers'),
-    url(r'^get_sample_numbers', hello.views.get_sample_numbers, name = 'get_sample_numbers'),
-    url(r'^get_sample', hello.views.get_sample, name = 'get_sample'),
-    url(r'^set_weight', hello.views.set_weight, name = 'set_weight'),
-    url(r'^add_property', hello.views.add_property, name = 'add_property'),
-    url(r'^get_property', hello.views.get_property, name = 'get_property'),
-    url(r'^upload_file', hello.views.upload_file, name = 'upload_file'),
-    url(r'^get_image_urls', hello.views.get_image_urls, name = 'get_image_urls')
+    url(r'^test_connection', hello.views.test_connection, name = 'Test Connections'),
+    url(r'^get_area_eastings', hello.views.get_area_eastings, name = 'Fetch Eastings'),
+    url(r'^get_area_northings', hello.views.get_area_northings, name = 'Fetch Northings'),
+    url(r'^get_context_numbers', hello.views.get_context_numbers, name = 'Fetch Contexts'),
+    url(r'^get_sample_numbers', hello.views.get_sample_numbers, name = 'Fetch Samples'),
+    url(r'^get_sample', hello.views.get_sample, name = 'Fetch Sample'),
+    url(r'^set_weight', hello.views.set_weight, name = 'Set Weight'),
+    url(r'^add_property', hello.views.add_property, name = 'Add Meta-variable'),
+    url(r'^get_property', hello.views.get_property, name = 'Get Meta-variable'),
+    url(r'^upload_file', hello.views.upload_file, name = 'Upload to S3'),
+    url(r'^get_image_urls', hello.views.get_image_urls, name = 'Get S3 URLs')
 ]

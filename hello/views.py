@@ -22,6 +22,8 @@ AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 MEDIA_URL = 'http://%s.s3.amazonaws.com/images/' % AWS_STORAGE_BUCKET_NAME
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+# Model for testing that upload_image form is valid
+# Param: form - the POST request form
 class UploadFileForm(forms.Form):
 	easting = forms.IntegerField(min_value = 0)
 	northing = forms.IntegerField(min_value = 0)
@@ -49,7 +51,7 @@ def find_sql_keyword(text):
 
 # Upload a file to Heroku
 # Param: request - POST request containing file
-# Returns an http response
+# Returns an HTTP response
 @csrf_exempt
 def upload_file(request):
 	if (request.method == 'POST'):
@@ -147,21 +149,26 @@ def index(request):
 # Get the relation names in the database
 # Param: request - HTTP client request
 # Returns an HTTP response
-def relations(request):
+def test_connection(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	cursor.execute("SELECT relname FROM pg_stat_user_tables WHERE schemaname = 'public';")
-	response = 'relname'
 	found = False
+	# Just looking to see there is something here
 	for relname in cursor.fetchall():
 		found = True
-		# Python thinks this is a tuple of 1 element
-		response = response + "\n" + relname[0]
 	if (not found):
-		response = 'Error: database is empty'
+		return HttpResponse("Error: No tables found", content_type = 'text/plain')
 	cursor.close()
 	connection.close()
-	return HttpResponse(response, content_type = 'text/plain')
+	s3 = boto3.resource('s3')
+	try:
+		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).list():
+			return HttpResponse("Connected to S3", content_type = 'text/plain')
+		return HttpResponse("Connected to S3, but bucket is empty", content_type = 'text/plain')
+	except (Exception, botocore.exceptions.ClientError):
+		return HttpResponse("Error: S3 Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+	return HttpResponse("Connections Established", content_type = 'text/plain')
 
 # Get the eastings in the database
 # Param: request - HTTP client request
