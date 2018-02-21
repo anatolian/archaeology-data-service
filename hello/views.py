@@ -92,8 +92,10 @@ def upload_file(request):
 				data = open(file_name, 'rb')
 				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
 				return HttpResponse("Upload Successful", 'test/plain')
+			except FileNotFoundError:
+				return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
 			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-				return HttpResponse("Error: Insertion failed" + error.message, content_type = "text/plain")
+				return HttpResponse("Error: Insertion failed" + error, content_type = "text/plain")
 			except (Exception, botocore.exceptions.ClientError):
 				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 		else:
