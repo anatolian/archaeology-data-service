@@ -65,6 +65,7 @@ def upload_file(request):
 			file_name = request.POST.get('file_name', '')
 			file = request.FILES.get('myFile', '');
 			keyword = find_sql_keyword(file_name)
+			# The form ensures the other fields must be integers
 			if (keyword != ''):
 				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
 			file_type = file_name[file_name.find('.'):]
@@ -72,12 +73,29 @@ def upload_file(request):
 				os.mkdir('upload/')
 			if (os.path.exists('upload/image' + file_type)):
 				os.remove('upload/image' + file_type)
-			with open('upload/image' + file_type, 'wb+') as destination:
-				for chunk in file.chunks():
-					destination.write(chunk)
-			url = '/add_image/?easting=' + easting + '&northing=' + northing + '&context=' + context + '&sample=' + sample
-			url = url + '&file_name=upload/image' + file_type
-			return HttpResponseRedirect(url)
+			try:
+				# Store the file from multi-part to Heroku Ephemeral File System
+				with open('upload/image' + file_type, 'wb+') as destination:
+					for chunk in file.chunks():
+						destination.write(chunk)
+				# Determine correct file name on S3
+				s3 = boto3.resource('s3')
+				path = easting + '/' + northing + '/' + context + '/' + sample + '/'
+				imageNumber = 0
+				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
+					if (imageNumber < number):
+						imageNumber = number
+				# Store the image on S3
+				# If the directory does not exist, will be added and count starts at 1
+				path = path + str(imageNumber + 1) + file_name[file_name.find('.'):]
+				data = open(file_name, 'rb')
+				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
+				return HttpResponse("Upload Successful", 'test/plain')
+			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
+				return HttpResponse("Error: Insertion failed", content_type = "text/plain")
+			except (Exception, botocore.exceptions.ClientError):
+				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 		else:
 			logger.info('Invalid Form')
 			form = UploadFileForm()
@@ -87,6 +105,7 @@ def upload_file(request):
 # Route for adding image to S3
 # Param: request - HTTP client request
 # Returns an HTML render
+@csrf_exempt
 def add_image(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
