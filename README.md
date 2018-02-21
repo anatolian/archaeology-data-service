@@ -5,16 +5,13 @@ Additionally, you will need to create an Amazon S3 bucket to store images onto.
 
 ## Dependencies
 You will need the following installed on your machine:
-
-	Python 3.6+ (preferably the newest version in case dependencies become depricated)
-
-	PostgreSQL
-
-	pip
+- Python 3.6+ (preferably the newest version in case dependencies become depricated)
+- PostgreSQL
+- pip
 
 ## Heroku - Running Locally
 
-Make sure you have Python [installed properly](http://install.python-guide.org). Also, install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) and
+Make sure you have Python installed properly (http://install.python-guide.org). Also, install the [Heroku CLI](https://devcenter.heroku.com/articles/heroku-cli) and
 [Postgres](https://devcenter.heroku.com/articles/heroku-postgresql#local-setup).
 
 Note also that running locally reads from environment variables. Please be sure to set the postgres_username, postgres_password, postgres_database, and postgres_hostname
@@ -55,11 +52,10 @@ For instructions on how to create an S3 bucket, see this page: https://devcenter
 Once the bucket is created, connect it to Heroku through the following tutorial: https://devcenter.heroku.com/articles/s3-upload-python
 (this page lists different environment variable names than Amazon does, stick with Amazon's)
 Be sure to:
-	- Send Heroku the bucket name: $ heroku config:set S3_BUCKET_NAME=bbb
-	- Add a rule in the ACL (Access Control List) granting all permissions for your own AWS account (and other users within the same access group)
-	- Add a rule in the ACL granting read permissions to all addresses (alternatively, you will have to individually add rules for each device with the Android app)
-	- Replace the bucket policy with the following (replacing [bucketname] with that of your own bucket). Alternatively, you can restrict access by adding each device
-	   IP to the "Principal" field
+- Send Heroku the bucket name: $ heroku config:set S3_BUCKET_NAME=bbb
+- Add a rule in the ACL (Access Control List) granting all permissions for your own AWS account (and other users within the same access group)
+- Add a rule in the ACL granting read permissions to all addresses (alternatively, you will have to individually add rules for each device with the Android app)
+- Replace the bucket policy with the following (replacing [bucketname] with that of your own bucket). Alternatively, you can restrict access by adding each device IP to the "Principal" field
 
 		{
     		"Version": "2012-10-17",
@@ -99,8 +95,7 @@ $ heroku config:set postgres_hostname=hhh
 $ heroku config:set S3_BUCKET_NAME=bbb
 ```
 
-The service directory must be a git repository for Heroku to accept it. If you cloned this project you should be good to go. Otherwise, you'll need to
-deploy it to a git service (e.g. bitbucket, GitHub, gitlab, etc). Then deploy the app through the following:
+The service directory must be a git repository for Heroku to accept it. If you cloned this project you should be good to go. Otherwise, you'll need to deploy it to a git service (e.g. bitbucket, GitHub, gitlab, etc). Then deploy the app through the following:
 
 ```sh
 $ heroku create
