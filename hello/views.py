@@ -163,7 +163,7 @@ def test_connection(request):
 	connection.close()
 	s3 = boto3.resource('s3')
 	try:
-		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME):
+		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.all():
 			return HttpResponse("Connected to S3", content_type = 'text/plain')
 		return HttpResponse("Connected to S3, but bucket is empty", content_type = 'text/plain')
 	except (Exception, botocore.exceptions.ClientError):
