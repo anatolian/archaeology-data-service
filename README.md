@@ -72,14 +72,16 @@ Be sure to:
 
 - Replace the current CORS configuration with the following:
 
-	<CORSConfiguration>
-		<CORSRule>
-			<AllowedOrigin>*</AllowedOrigin>
-			<AllowedMethod>GET</AllowedMethod>
-			<MaxAgeSeconds>3000</MaxAgeSeconds>
-			<AllowedHeader>Authorization</AllowedHeader>
-		</CORSRule>
-	</CORSConfiguration>
+```html
+<CORSConfiguration>
+	<CORSRule>
+		<AllowedOrigin>*</AllowedOrigin>
+		<AllowedMethod>GET</AllowedMethod>
+		<MaxAgeSeconds>3000</MaxAgeSeconds>
+		<AllowedHeader>Authorization</AllowedHeader>
+	</CORSRule>
+</CORSConfiguration>
+```	
 
 ## Deploying to Heroku
 
