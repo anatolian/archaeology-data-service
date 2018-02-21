@@ -99,56 +99,6 @@ def upload_file(request):
 	logger.info('Redirecting request to blank form')
 	return render(request, 'upload_image.html', {'form': form})
 
-# Route for adding image to S3
-# Param: request - HTTP client request
-# Returns an HTML render
-@csrf_exempt
-def add_image(request):
-	easting = request.GET.get('easting', '')
-	northing = request.GET.get('northing', '')
-	context = request.GET.get('context', '')
-	sample = request.GET.get('sample', '')
-	file_name = request.GET.get('file_name', '')
-	# Should have already been checked but checking again in case its possible to call this method without upload_image first
-	keyword = find_sql_keyword(file_name)
-	try:
-		int(easting)
-	except ValueError:
-		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
-	try:
-		int(northing)
-	except ValueError:
-		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
-	try:
-		int(context)
-	except ValueError:
-		return HttpResponse('Provided context number is not a number', content_type = 'text/plain')
-	try:
-		int(sample)
-	except ValueError:
-		return HttpResponse('Provided sample number is not a number', content_type = 'text/plain')
-	if (keyword != ''):
-		return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
-	s3 = boto3.resource('s3')
-	path = easting + '/' + northing + '/' + context + '/' + sample + '/'
-	try:
-		imageNumber = 0
-		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
-			if (imageNumber < number):
-				imageNumber = number
-		# If the directory does not exist, will be added and count starts at 1
-		path = path + str(imageNumber + 1) + file_name[file_name.find('.'):]
-		data = open(file_name, 'rb')
-		s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
-	except FileNotFoundError:
-		return HttpResponse('File ' + file_name + ' could not be found', content_type = 'text/plain')
-	except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-		return HttpResponse("Error: Insertion failed", content_type = "text/plain")
-	except (Exception, botocore.exceptions.ClientError):
-		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
-	return HttpResponse("File uploaded successfully", content_type = 'text/plain')
-
 # Route for fetching image urls
 # Param request - HTTP client request
 # Returns an HTTP response
