@@ -93,7 +93,7 @@ def upload_file(request):
 				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
 				return HttpResponse("Upload Successful", 'test/plain')
 			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-				return HttpResponse("Error: Insertion failed", content_type = "text/plain")
+				return HttpResponse("Error: Insertion failed" + error.message, content_type = "text/plain")
 			except (Exception, botocore.exceptions.ClientError):
 				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 		else:
