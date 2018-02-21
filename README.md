@@ -5,8 +5,11 @@ Additionally, you will need to create an Amazon S3 bucket to store images onto.
 
 ## Dependencies
 You will need the following installed on your machine:
+
 	Python 3.6+ (preferably the newest version in case dependencies become depricated)
+
 	PostgreSQL
+
 	pip
 
 ## Heroku - Running Locally
@@ -37,11 +40,12 @@ You can also access a database created outside of Heroku the same way.
 
 The server can be accessed via https://<serverURL>.com
 The scripts are currently being saved in the top directory and can be called by appending their names to the end with the correct routing.
-For example, with scripts in the top level directory: https://<serverURL>.com/relations is a script that checks for the presense of tables,
+For example, with scripts in the top level directory https://<serverURL>.com/relations is a script that checks for the presense of tables,
 	and returns whether or not a connection has been made.
-- Some scripts require GET parameters in order to run.
-For example, with scripts in the top level directory: https://<serverURL>.com/get_northings/?easting=10
-or https://<serverURL>.com/get_samples/?easting=10&northing=20&context=1
+
+Note: Some scripts require GET parameters in order to run.
+For example, with scripts in the top level directory: - https://<serverURL>.com/get_northings/?easting=10
+	or - https://<serverURL>.com/get_samples/?easting=10&northing=20&context=1
 
 This server also has very basic views, so navigating to the corresponding URL of a route will display a server response, sometimes an HTML page with links,
 	but plaintext for other calls.
@@ -51,15 +55,10 @@ For instructions on how to create an S3 bucket, see this page: https://devcenter
 Once the bucket is created, connect it to Heroku through the following tutorial: https://devcenter.heroku.com/articles/s3-upload-python
 (this page lists different environment variable names than Amazon does, stick with Amazon's)
 Be sure to:
-	1) Send Heroku the bucket name
-
-	```sh
-	$ heroku config:set S3_BUCKET_NAME=bbb
-	```
-	
-	2) Add a rule in the ACL (Access Control List) granting all permissions for your own AWS account (and other users within the same access group)
-	3) Add a rule in the ACL granting read permissions to all addresses (alternatively, you will have to individually add rules for each device with the Android app)
-	4) Replace the bucket policy with the following (replacing [bucketname] with that of your own bucket). Alternatively, you can restrict access by adding each device
+	- Send Heroku the bucket name: $ heroku config:set S3_BUCKET_NAME=bbb
+	- Add a rule in the ACL (Access Control List) granting all permissions for your own AWS account (and other users within the same access group)
+	- Add a rule in the ACL granting read permissions to all addresses (alternatively, you will have to individually add rules for each device with the Android app)
+	- Replace the bucket policy with the following (replacing [bucketname] with that of your own bucket). Alternatively, you can restrict access by adding each device
 	   IP to the "Principal" field
 
 		{
@@ -75,7 +74,7 @@ Be sure to:
     		]
 		}
 
-	5) Replace the current CORS configuration with the following:
+- Replace the current CORS configuration with the following:
 
 	<CORSConfiguration>
 		<CORSRule>
@@ -109,9 +108,6 @@ $ git push heroku master
 $ heroku run python manage.py migrate
 $ heroku open
 ```
-or
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy).
 
 # LICENSE
 
