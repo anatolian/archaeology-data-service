@@ -5,6 +5,7 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.db import transaction
 from django.template import RequestContext
 from django import forms
+from django.views.decorators.csrf import csrf_exempt
 import psycopg2
 import os, json, boto3
 import logging
@@ -21,6 +22,14 @@ AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
 AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
 MEDIA_URL = 'http://%s.s3.amazonaws.com/images/' % AWS_STORAGE_BUCKET_NAME
 DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+class UploadFileForm(forms.Form):
+	easting = forms.IntegerField(min_value = 0)
+	northing = forms.IntegerField(min_value = 0)
+	context = forms.IntegerField(min_value = 0)
+	sample = forms.IntegerField(min_value = 0)
+	file_name = forms.CharField(max_length = 250)
+	myFile = forms.FileField()
+
 # Detect SQL keywords in a string
 # Param: text - string to search
 # Returns the found keyword, if any
@@ -38,19 +47,10 @@ def find_sql_keyword(text):
 			return keyword
 	return ''
 
-# File to upload
-# Param: form - POST form containing the file
-class UploadFileForm(forms.Form):
-	easting = forms.IntegerField(min_value = 0)
-	northing = forms.IntegerField(min_value = 0)
-	context = forms.IntegerField(min_value = 0)
-	sample = forms.IntegerField(min_value = 0)
-	file_name = forms.CharField(max_length = 250)
-	myFile = forms.FileField()
-
 # Upload a file to Heroku
 # Param: request - POST request containing file
 # Returns an http response
+@csrf_exempt
 def upload_file(request):
 	if (request.method == 'POST'):
 		# Store file to temporary location then upload to s3
