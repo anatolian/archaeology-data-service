@@ -1,6 +1,6 @@
 # Archaeology Service:
 Contains Python scripts for retrieving and sending information to a database.
-You will need to create either an Amazon EC2 instance or a Heroku webapp to host the service onto.
+You will need to create a Heroku webapp to host the service onto.
 Additionally, you will need to create an Amazon S3 bucket to store images onto.
 
 ## Dependencies
@@ -8,26 +8,6 @@ You will need the following installed on your machine:
 	Python 3.6+ (preferably the newest version in case dependencies become depricated)
 	PostgreSQL
 	pip
-
-## You may use an Amazon EC2 instance:
-For instructions on launching an EC2 instance: https://aws.amazon.com/ec2/getting-started/.
-- Make sure to open port 5432 to all traffic.
-- Make sure to create a key pair and download it to your machine. Either store the .pem outside of the project directory or add it
-	to the .gitignore. NEVER PUSH THE .pem FILE!
-- You will need to copy the contents of the Archaeology service directory (NOT the directory itself) to the EC2 instance.
-	- MAC/LINUX users can use scp through Terminal.
-	- Windows users with Bash installed (https://git-scm.com/downloads) can use scp, otherwise, use FileZilla (https://filezilla-project.org/)
-- Once the EC2 instance is launched, in Properties.php, replace:
-	- The value of PG_HOST with the EC2 instance's Public DNS (IPv4), found on the EC2 console.
-	- The value of PG_DB with the EC2 DB name.
-	- The value of PG_USERNAME with the EC2 account associated with the DB.
-	- The value of PG_PASSWORD with the DB password.
-	- The value of TEST_BASE_IMAGE_URL with the EC2 IPv4 Public IP.
-	- NOTE: NEVER PUSH THESE VALUES TO ANY REPOSITORY. Alternatively, if you make PG_HOST, PG_DB, PG_USERNAME, and PG_PASSWORD
-		read from environment variables, you can push this file.
-
-Archaeology app retrieves and sends via yourWebServerURL/web/appropriate_php_script.php
-	i.e. http://ec2-XX-XXX-XX-XX.compute-1.amazonaws.com/web/test_service.php
 
 ## Heroku - Running Locally
 
@@ -39,41 +19,14 @@ variables corresponding to the PostgreSQL connection parameters. See Section Pos
 and S3_BUCKET_NAME from Section Amazon S3 below.
 
 ```sh
-$ git clone git@github.com:heroku/python-getting-started.git
-$ cd python-getting-started
-
 $ pipenv install
-
-$ createdb python_getting_started
-
 $ python manage.py migrate
 $ python manage.py collectstatic
-
 $ heroku local
 ```
 
-Your app should now be running on [localhost:5000](http://localhost:5000/).
-
-## Deploying to Heroku
-
-Before deploying to Heroku for the first time, you must send your required environment variables to it through the following command:
-
-```sh
-$ heroku config:set AWS_ACCESS_KEY_ID=xxx AWS_SECRET_ACCESS_KEY=yyy postgres_username=zzz postgres_password=ppp postgres_database=ddd postgres_hostname=hhh S3_BUCKET_NAME=bbb
-```
-
-Then deploy the app through the following:
-
-```sh
-$ heroku create
-$ git push heroku master
-
-$ heroku run python manage.py migrate
-$ heroku open
-```
-or
-
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+Your app should now be running on [localhost:5000](http://localhost:5000/). Note, deploying locally can help debug setup issues, but to actually communicate with the Android
+app you will need to deploy to a proper web service (i.e. Heroku). See the next section once local deployment works.
 
 ## PostgreSQL
 To set up a PostgreSQL database with Heroku: https://devcenter.heroku.com/articles/heroku-postgresql#provisioning-heroku-postgres.
@@ -86,7 +39,7 @@ The server can be accessed via https://<serverURL>.com
 The scripts are currently being saved in the top directory and can be called by appending their names to the end with the correct routing.
 For example, with scripts in the top level directory: https://<serverURL>.com/relations is a script that checks for the presense of tables,
 	and returns whether or not a connection has been made.
-- Some scripts require arguments in order to run.
+- Some scripts require GET parameters in order to run.
 For example, with scripts in the top level directory: https://<serverURL>.com/get_northings/?easting=10
 or https://<serverURL>.com/get_samples/?easting=10&northing=20&context=1
 
@@ -97,6 +50,68 @@ This server also has very basic views, so navigating to the corresponding URL of
 For instructions on how to create an S3 bucket, see this page: https://devcenter.heroku.com/articles/s3
 Once the bucket is created, connect it to Heroku through the following tutorial: https://devcenter.heroku.com/articles/s3-upload-python
 (this page lists different environment variable names than Amazon does, stick with Amazon's)
+Be sure to:
+	1) Send Heroku the bucket name
+
+	```sh
+	$ heroku config:set S3_BUCKET_NAME=bbb
+	```
+	
+	2) Add a rule in the ACL (Access Control List) granting all permissions for your own AWS account (and other users within the same access group)
+	3) Add a rule in the ACL granting read permissions to all addresses (alternatively, you will have to individually add rules for each device with the Android app)
+	4) Replace the bucket policy with the following (replacing [bucketname] with that of your own bucket). Alternatively, you can restrict access by adding each device
+	   IP to the "Principal" field
+
+		{
+    		"Version": "2012-10-17",
+    		"Statement": [
+    		    {
+    		        "Sid": "PublicReadGetObject",
+    		        "Effect": "Allow",
+    		        "Principal": "*",
+    		        "Action": "s3:GetObject",
+    		        "Resource": "arn:aws:s3:::[bucketname]/*"
+    		    }
+    		]
+		}
+
+	5) Replace the current CORS configuration with the following:
+
+	<CORSConfiguration>
+		<CORSRule>
+			<AllowedOrigin>*</AllowedOrigin>
+			<AllowedMethod>GET</AllowedMethod>
+			<MaxAgeSeconds>3000</MaxAgeSeconds>
+			<AllowedHeader>Authorization</AllowedHeader>
+		</CORSRule>
+	</CORSConfiguration>
+
+## Deploying to Heroku
+
+Before deploying to Heroku for the first time, you must send your required environment variables to it through the following commands:
+
+```sh
+$ heroku config:set AWS_ACCESS_KEY_ID=xxx
+$ heroku config:set AWS_SECRET_ACCESS_KEY=yyy
+$ heroku config:set postgres_username=zzz
+$ heroku config:set postgres_password=ppp
+$ heroku config:set postgres_database=ddd
+$ heroku config:set postgres_hostname=hhh
+$ heroku config:set S3_BUCKET_NAME=bbb
+```
+
+The service directory must be a git repository for Heroku to accept it. If you cloned this project you should be good to go. Otherwise, you'll need to
+deploy it to a git service (e.g. bitbucket, GitHub, gitlab, etc). Then deploy the app through the following:
+
+```sh
+$ heroku create
+$ git push heroku master
+$ heroku run python manage.py migrate
+$ heroku open
+```
+or
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy).
 
 # LICENSE
 
