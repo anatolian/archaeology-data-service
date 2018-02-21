@@ -72,19 +72,19 @@ def upload_file(request):
 			file_type = file_name[file_name.find('.'):]
 			s3 = boto3.resource('s3')
 			try:
+				# Store the file from multi-part to Heroku Ephemeral File System
+				with open('image' + file_type, 'wb+') as destination:
+					for chunk in file.chunks():
+						destination.write(chunk)
 				# Determine correct file name on S3
 				imageNumber = 0
 				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
 					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
 					if (imageNumber < number):
 						imageNumber = number
-				path = path + str(imageNumber + 1) + file_type
-				# Store the file from multi-part to Heroku Ephemeral File System
-				with open('image' + file_type, 'wb+') as destination:
-					for chunk in file.chunks():
-						destination.write(chunk)
-				data = open('image' + file_type, 'rb')
 				# Store the image on S3
+				path = path + str(imageNumber + 1) + file_type
+				data = open('image' + file_type, 'rb')
 				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
 				return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
 			except FileNotFoundError:
