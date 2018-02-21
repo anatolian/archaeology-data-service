@@ -56,7 +56,7 @@ def upload_file(request):
 		# Store file to temporary location then upload to s3
 		logger.info('POST Detected')
 		form = UploadFileForm(request.POST, request.FILES)
-		if form.is_valid():
+		if (form.is_valid()):
 			logger.info('Valid Form')
 			easting = request.POST.get('easting', '')
 			northing = request.POST.get('northing', '')
@@ -68,34 +68,29 @@ def upload_file(request):
 			# The form ensures the other fields must be integers
 			if (keyword != ''):
 				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
+			path = easting + '/' + northing + '/' + context + '/' + sample + '/'
 			file_type = file_name[file_name.find('.'):]
-			if (not os.path.exists('upload/')):
-				os.mkdir('upload/')
-			if (os.path.exists('upload/image' + file_type)):
-				os.remove('upload/image' + file_type)
+			s3 = boto3.resource('s3')
 			try:
-				# Store the file from multi-part to Heroku Ephemeral File System
-				with open('upload/image' + file_type, 'wb+') as destination:
-					for chunk in file.chunks():
-						destination.write(chunk)
 				# Determine correct file name on S3
-				s3 = boto3.resource('s3')
-				path = easting + '/' + northing + '/' + context + '/' + sample + '/'
 				imageNumber = 0
 				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
 					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
 					if (imageNumber < number):
 						imageNumber = number
+				path = path + str(imageNumber + 1) + file_type
+				# Store the file from multi-part to Heroku Ephemeral File System
+				with open('image' + file_type, 'wb+') as destination:
+					for chunk in file.chunks():
+						destination.write(chunk)
+				data = open('image' + file_type, 'rb')
 				# Store the image on S3
-				# If the directory does not exist, will be added and count starts at 1
-				path = path + str(imageNumber + 1) + file_name[file_name.find('.'):]
-				data = open(file_name, 'rb')
 				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
-				return HttpResponse("Upload Successful", 'test/plain')
+				return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
 			except FileNotFoundError:
 				return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
 			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-				return HttpResponse("Error: Insertion failed" + error, content_type = "text/plain")
+				return HttpResponse("Error: Insertion failed " + error, content_type = "text/plain")
 			except (Exception, botocore.exceptions.ClientError):
 				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 		else:
