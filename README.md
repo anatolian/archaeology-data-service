@@ -35,14 +35,14 @@ From terminal/cmd prompt, with Postgres set up: psql -h HOST -U USER PASS,
 where HOST, USER, and PASS can be found in your Heroku properties if you're using Heroku.
 You can also access a database created outside of Heroku the same way.
 
-The server can be accessed via https://<serverURL>.com
+The server can be accessed via https://[serverURL].com
 The scripts are currently being saved in the top directory and can be called by appending their names to the end with the correct routing.
-For example, with scripts in the top level directory https://<serverURL>.com/relations is a script that checks for the presense of tables,
+For example, with scripts in the top level directory https://[serverURL].com/relations is a script that checks for the presense of tables,
 	and returns whether or not a connection has been made.
 
 Note: Some scripts require GET parameters in order to run.
-For example, with scripts in the top level directory: - https://<serverURL>.com/get_northings/?easting=10
-	or - https://<serverURL>.com/get_samples/?easting=10&northing=20&context=1
+For example, with scripts in the top level directory: - https://[serverURL].com/get_northings/?easting=10
+	or - https://[serverURL].com/get_samples/?easting=10&northing=20&context=1
 
 This server also has very basic views, so navigating to the corresponding URL of a route will display a server response, sometimes an HTML page with links,
 	but plaintext for other calls.
