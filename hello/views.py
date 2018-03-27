@@ -150,17 +150,17 @@ def test_connection(request):
 	# Just looking to see there is something here
 	for relname in cursor.fetchall():
 		found = True
-	if (not found):
-		return HttpResponse("Error: No tables found", content_type = 'text/plain')
 	cursor.close()
 	connection.close()
-	s3 = boto3.resource('s3')
-	try:
-		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.all():
-			return HttpResponse("Connected to S3", content_type = 'text/plain')
-		return HttpResponse("Connected to S3, but bucket is empty", content_type = 'text/plain')
-	except (Exception, botocore.exceptions.ClientError):
-		return HttpResponse("Error: S3 Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+	if (not found):
+		return HttpResponse("Error: No tables found", content_type = 'text/plain')
+	# s3 = boto3.resource('s3')
+	# try:
+	# 	for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.all():
+	# 		return HttpResponse("Connected to S3", content_type = 'text/plain')
+	# 	return HttpResponse("Connected to S3, but bucket is empty", content_type = 'text/plain')
+	# except (Exception, botocore.exceptions.ClientError):
+	# 	return HttpResponse("Error: S3 Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 	return HttpResponse("Connections Established", content_type = 'text/plain')
 
 # Get the eastings in the database
