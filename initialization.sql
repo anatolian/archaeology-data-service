@@ -1,41 +1,51 @@
-DROP TABLE IF EXISTS Samples;
-CREATE TABLE Samples (
-    area_easting INTEGER,
-    area_northing INTEGER,
-    context_number INTEGER,
-    sample_number INTEGER,
-    material VARCHAR(10),
-    exterior_color_hue VARCHAR(10),
-    exterior_color_lightness_value VARCHAR(10),
-    exterior_color_chroma VARCHAR(10),
-    interior_color_hue VARCHAR(10),
-    interior_color_lightness_value VARCHAR(10),
-    interior_color_chroma VARCHAR(10),
-    weight_kilograms NUMERIC(6, 3),
-    status VARCHAR(8),
-    PRIMARY KEY(area_easting, area_northing, context_number, sample_number)
-);
-INSERT INTO Samples VALUES (30, 40, 3, 4, 'clay', '10R', '5', '3', '5YR', '6', '4', 0, 'active');
-INSERT INTO Samples VALUES (50, 60, 4, 5, 'ceramic', '8YR', '3', '2', '6R', '1', '1', 88, 'active');
-INSERT INTO Samples VALUES (11, 21, 1, 5, 'metal', '10R', '5', '3', '5YR', '6', '4', 123.0, 'active');
-INSERT INTO Samples VALUES (10, 20, 1, 1, 'stone', 'brown', 'light_br', 'brownish', 'red', 'light_red', 'reddish', 0.163, 'active');
-INSERT INTO Samples VALUES (10, 20, 1, 2, 'ceramic', 'green', 'yellow', 'yellow', 'orange', 'red', 'red', 0.44, 'active');
-INSERT INTO Samples VALUES (10, 20, 1, 3, 'clay', 'yellow', 'green', 'orange', 'yellow', 'red', 'red', 0.44, 'active');
-DROP TABLE IF EXISTS Areas;
-CREATE TABLE Areas (
-	area_easting INTEGER,
-	area_northing INTEGER,
-	area_key VARCHAR(10),
-	status VARCHAR(8),
-	PRIMARY KEY(area_easting, area_northing)
-);
-INSERT INTO Areas VALUES (10, 20, '10.20', 'active');
-INSERT INTO Areas VALUES (11, 21, '11.21', 'active');
-INSERT INTO Areas VALUES (30, 40, '30.40', 'active');
-INSERT INTO Areas VALUES (50, 60, '50.60', 'active');
+-- CREATE TABLE finds (
+--     utm_hemisphere CHARACTER(1),
+--     utm_zone INTEGER,
+--     context_utm_easting_meters INTEGER,
+--     context_utm_northing_meters INTEGER,
+--     find_number INTEGER,
+--     longitude_decimal_degrees NUMERIC(6, 3),
+--     latitude_decimal_degrees NUMERIC(6, 3),
+--     utm_easting_meters NUMERIC(6, 3),
+--     utm_northing_meters NUMERIC(6, 3),
+--     material_general VARCHAR,
+--     material_specific VARCHAR,
+--     category_general VARCHAR,
+--     category_specific VARCHAR,
+--     weight_kilograms NUMERIC(6, 3),
+--     PRIMARY KEY(utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number)
+-- );
+INSERT INTO finds VALUES ('N', 35, 123456, 567890, 1, 38.963, 35.243, 100.3, 27.6, 'ceramic', 'painted', 'pottery', 'bowl', 27.3);
+INSERT INTO finds VALUES ('N', 35, 123456, 567890, 2, 38.963, 35.243, 100.3, 27.6, 'metal', 'copper', 'jewelry', 'bracelet', 27.3);
+INSERT INTO finds VALUES ('N', 35, 123456, 098765, 1, 38.963, 35.243, 100.3, 27.6, 'ceramic', 'painted', 'pottery', 'bowl', 27.3);
+INSERT INTO finds VALUES ('N', 35, 654321, 098765, 1, 38.963, 35.243, 100.3, 27.6, 'ceramic', 'painted', 'pottery', 'bowl', 27.3);
+INSERT INTO finds VALUES ('N', 35, 654321, 567890, 1, 38.963, 35.243, 100.3, 27.6, 'metal', 'silver', 'jewelry', 'necklace', 27.3);
+INSERT INTO finds VALUES ('N', 35, 654321, 567890, 2, 38.963, 35.243, 100.3, 27.6, 'ceramic', 'painted', 'pottery', 'bowl', 27.3);
+-- CREATE TABLE finds_colors (
+-- 	utm_hemisphere CHARACTER(1),
+--     utm_zone INTEGER,
+--     context_utm_easting_meters INTEGER,
+--     context_utm_northing_meters INTEGER,
+--     find_number INTEGER,
+--     color_location VARCHAR,
+--     munsell_hue_number NUMERIC(6, 3),
+--     munsell_hue_letter CHARACTER(1),
+--     munsell_lightness_value NUMERIC(6, 3),
+--     munsell_chroma NUMERIC(6, 3),
+--     rgb_red_256_bit INTEGER,
+--     rgb_green_256_bit INTEGER,
+--     rgb_blue_256_bit INTEGER,
+-- 	PRIMARY KEY(utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number, color_location)
+-- );
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 1, 'interior', 10.2, 'R', 20.4, 12.0, 255, 0, 0);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 2, 'exterior', 20.4, 'G', 10.2, 13.0, 0, 255, 0);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 098765, 1, 'interior', 10.2, 'R', 20.4, 14.0, 0, 0, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 098765, 1, 'interior', 10.2, 'R', 20.4, 15.0, 255, 0, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 1, 'interior', 20.4, 'B', 10.2, 16.0, 255, 255, 0);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 2, 'exterior', 10.2, 'R', 20.4, 17.0, 0, 255, 255);
 DROP TABLE IF EXISTS Properties;
 CREATE TABLE Properties (
-    label VARCHAR(40),
-    value VARCHAR(100),
+    label VARCHAR,
+    value VARCHAR,
     PRIMARY KEY(label)
 );
