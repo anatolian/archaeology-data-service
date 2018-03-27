@@ -1,8 +1,8 @@
 {
   "name": "Start on Heroku: Python",
-  "description": "A barebones Python app, which can easily be deployed to Heroku.",
+  "description": "Penn Museum Archaeology artifact lookup service",
   "image": "heroku/python",
-  "repository": "https://github.com/heroku/python-getting-started",
+  "repository": "https://github.com/anatolian/archaeology-object-data-collector-service",
   "keywords": ["python", "django" ],
   "addons": [ "heroku-postgresql" ],
   "env": {
