@@ -10,6 +10,7 @@ urlpatterns = [
     url(r'^get_northings', hello.views.get_northings, name = 'Fetch Northings'),
     url(r'^get_finds', hello.views.get_finds, name = 'Fetch Finds'),
     url(r'^get_find', hello.views.get_find, name = 'Fetch Find'),
+    url(r'^get_find_colors', hello.views.get_find_colors, name = 'Fetch Find Colors'),
     url(r'^set_weight', hello.views.set_weight, name = 'Set Weight'),
     url(r'^add_property', hello.views.add_property, name = 'Add Meta-variable'),
     url(r'^get_property', hello.views.get_property, name = 'Get Meta-variable')#,

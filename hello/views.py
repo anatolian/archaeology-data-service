@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django import forms
 from django.views.decorators.csrf import csrf_exempt
 import psycopg2
-import os, json, boto3
+import os, json#, boto3
 import logging
 logger = logging.getLogger('testlogger')
 # For local deployment, these should be defined in system environment variables.
@@ -16,20 +16,20 @@ hostname = os.environ['postgres-hostname']
 username = os.environ['postgres-username']
 password = os.environ['postgres-password']
 database = os.environ['postgres-database']
-AWS_QUERYSTRING_AUTH = False
-AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
-MEDIA_URL = 'http://%s.s3.amazonaws.com/images/' % AWS_STORAGE_BUCKET_NAME
-DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
+# AWS_QUERYSTRING_AUTH = False
+# AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+# AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+# AWS_STORAGE_BUCKET_NAME = os.environ['S3_BUCKET_NAME']
+# MEDIA_URL = 'http://%s.s3.amazonaws.com/images/' % AWS_STORAGE_BUCKET_NAME
+# DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
 # Model for testing that upload_image form is valid
 # Param: form - the POST request form
-class UploadFileForm(forms.Form):
-	easting = forms.IntegerField(min_value = 0)
-	northing = forms.IntegerField(min_value = 0)
-	find = forms.IntegerField(min_value = 0)
-	file_name = forms.CharField(max_length = 250)
-	myFile = forms.FileField()
+# class UploadFileForm(forms.Form):
+# 	easting = forms.IntegerField(min_value = 0)
+# 	northing = forms.IntegerField(min_value = 0)
+# 	find = forms.IntegerField(min_value = 0)
+# 	file_name = forms.CharField(max_length = 250)
+# 	myFile = forms.FileField()
 
 # Detect SQL keywords in a string
 # Param: text - string to search
@@ -51,87 +51,87 @@ def find_sql_keyword(text):
 # Upload a file to Heroku
 # Param: request - POST request containing file
 # Returns an HTTP response
-@csrf_exempt
-def upload_file(request):
-	if (request.method == 'POST'):
-		# Store file to temporary location then upload to s3
-		logger.info('POST Detected')
-		form = UploadFileForm(request.POST, request.FILES)
-		if (form.is_valid()):
-			logger.info('Valid Form')
-			easting = request.POST.get('easting', '')
-			northing = request.POST.get('northing', '')
-			find = request.POST.get('find', '')
-			file_name = request.POST.get('file_name', '')
-			file = request.FILES.get('myFile', '');
-			keyword = find_sql_keyword(file_name)
-			# The form ensures the other fields must be integers
-			if (keyword != ''):
-				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
-			path = 'N/35/' + easting + '/' + northing + '/' + find + '/'
-			file_type = file_name[file_name.find('.'):]
-			s3 = boto3.resource('s3')
-			try:
-				# Store the file from multi-part to Heroku Ephemeral File System
-				with open('image' + file_type, 'wb+') as destination:
-					for chunk in file.chunks():
-						destination.write(chunk)
-				# Determine correct file name on S3
-				imageNumber = 0
-				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
-					if (imageNumber < number):
-						imageNumber = number
-				# Store the image on S3
-				path = path + str(imageNumber + 1) + file_type
-				data = open('image' + file_type, 'rb')
-				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
-				return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
-			except FileNotFoundError:
-				return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
-			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-				return HttpResponse("Error: Insertion failed " + error, content_type = "text/plain")
-			except (Exception, botocore.exceptions.ClientError):
-				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
-		else:
-			logger.info('Invalid Form')
-			form = UploadFileForm()
-	logger.info('Redirecting request to blank form')
-	return render(request, 'upload_image.html', {'form': form})
+# @csrf_exempt
+# def upload_file(request):
+# 	if (request.method == 'POST'):
+# 		# Store file to temporary location then upload to s3
+# 		logger.info('POST Detected')
+# 		form = UploadFileForm(request.POST, request.FILES)
+# 		if (form.is_valid()):
+# 			logger.info('Valid Form')
+# 			easting = request.POST.get('easting', '')
+# 			northing = request.POST.get('northing', '')
+# 			find = request.POST.get('find', '')
+# 			file_name = request.POST.get('file_name', '')
+# 			file = request.FILES.get('myFile', '');
+# 			keyword = find_sql_keyword(file_name)
+# 			# The form ensures the other fields must be integers
+# 			if (keyword != ''):
+# 				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
+# 			path = 'N/35/' + easting + '/' + northing + '/' + find + '/'
+# 			file_type = file_name[file_name.find('.'):]
+# 			s3 = boto3.resource('s3')
+# 			try:
+# 				# Store the file from multi-part to Heroku Ephemeral File System
+# 				with open('image' + file_type, 'wb+') as destination:
+# 					for chunk in file.chunks():
+# 						destination.write(chunk)
+# 				# Determine correct file name on S3
+# 				imageNumber = 0
+# 				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+# 					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
+# 					if (imageNumber < number):
+# 						imageNumber = number
+# 				# Store the image on S3
+# 				path = path + str(imageNumber + 1) + file_type
+# 				data = open('image' + file_type, 'rb')
+# 				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
+# 				return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
+# 			except FileNotFoundError:
+# 				return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
+# 			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
+# 				return HttpResponse("Error: Insertion failed " + error, content_type = "text/plain")
+# 			except (Exception, botocore.exceptions.ClientError):
+# 				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+# 		else:
+# 			logger.info('Invalid Form')
+# 			form = UploadFileForm()
+# 	logger.info('Redirecting request to blank form')
+# 	return render(request, 'upload_image.html', {'form': form})
 
-# Route for fetching image urls
-# Param request - HTTP client request
-# Returns an HTTP response
-def get_image_urls(request):
-	easting = request.GET.get('easting', '')
-	northing = request.GET.get('northing', '')
-	find = request.GET.get('find', '')
-	try:
-		int(easting)
-	except ValueError:
-		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
-	try:
-		int(northing)
-	except ValueError:
-		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
-	try:
-		int(find)
-	except ValueError:
-		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
-	s3 = boto3.resource('s3')
-	path = easting + '/' + northing + '/' + find + '/'
-	response = '<h3>Image URLs:</h3><ul>'
-	found = False
-	try:
-		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key + "'>" + file.key + "</a></li>"
-			found = True
-		response = response + "</ul>"
-		if (not found):
-			return HttpResponse('<h3>No images found</h3>', 'text/html')
-		return HttpResponse(response, 'text/html')
-	except (Exception, botocore.exceptions.ClientError):
-		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+# # Route for fetching image urls
+# # Param request - HTTP client request
+# # Returns an HTTP response
+# def get_image_urls(request):
+# 	easting = request.GET.get('easting', '')
+# 	northing = request.GET.get('northing', '')
+# 	find = request.GET.get('find', '')
+# 	try:
+# 		int(easting)
+# 	except ValueError:
+# 		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
+# 	try:
+# 		int(northing)
+# 	except ValueError:
+# 		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
+# 	try:
+# 		int(find)
+# 	except ValueError:
+# 		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
+# 	s3 = boto3.resource('s3')
+# 	path = easting + '/' + northing + '/' + find + '/'
+# 	response = '<h3>Image URLs:</h3><ul>'
+# 	found = False
+# 	try:
+# 		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+# 			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key + "'>" + file.key + "</a></li>"
+# 			found = True
+# 		response = response + "</ul>"
+# 		if (not found):
+# 			return HttpResponse('<h3>No images found</h3>', 'text/html')
+# 		return HttpResponse(response, 'text/html')
+# 	except (Exception, botocore.exceptions.ClientError):
+# 		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 
 # Main page
 # Param: request - HTTP client request
@@ -282,6 +282,47 @@ def get_find(request):
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
 
+# Get colors from the database
+# Param: request - HTTP client request
+# Returns an HTTP response
+def get_find_colors(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	location = request.GET.get('location', '')
+	find = request.GET.get('find', '')
+	try:
+		int(easting)
+	except ValueError:
+		return HttpResponse('Provided easting is not a number', content_type = 'text/plain')
+	try:
+		int(northing)
+	except ValueError:
+		return HttpResponse('Provided northing is not a number', content_type = 'text/plain')
+	try:
+		int(find)
+	except ValueError:
+		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
+	if (len(location)):
+		return HttpResponse('location must be either "interior" or "exterior"', content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+	query = query + " AND find_number = " + find + " AND color_location = " + location + ";"
+	cursor.execute(query)
+	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
+	found = False
+	for findEntry in cursor.fetchall():
+		response = response + "\n" + str(findEntry[5])
+		# Skipping primary keys
+		for i in range(6, 14):
+			response = response + " | " + str(findEntry[i])
+		found = True
+	if (not found):
+		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = ' + find + ' found in finds table'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
+
 # Set the weight of an object
 # Param: request - HTTP client request
 # Returns an HTTP response
@@ -323,10 +364,10 @@ def add_property(request):
 	value = request.GET.get('value', '')
 	keySQL = find_sql_keyword(key)
 	valueSQL = find_sql_keyword(value)
-	if (keySQL != ''):
-		return HttpResponse("Error: SQL Keyword " + keySQL + " found in key", content_type = 'text/plain')
-	elif (valueSQL != ''):
-		return HttpResponse("Error: SQL Keyword " + valueSQL + " found in value", content_type = 'text/plain')
+	if (len(key) == 0 or keySQL != ''):
+		return HttpResponse("Error: key cannot be empty or contain SQL keywords", content_type = 'text/plain')
+	elif (len(value) == 0 or valueSQL != ''):
+		return HttpResponse("Error: value cannot be empty or contain SQL keywords", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO Properties VALUES (\'" + key + "\', \'" + value + "\');"
@@ -359,8 +400,8 @@ def add_property(request):
 def get_property(request):
 	key = request.GET.get('key', '')
 	keyword = find_sql_keyword(key)
-	if (keyword != ''):
-		return HttpResponse("Error: SQL Keyword " + keyword + " found in key", content_type = 'text/plain')
+	if (len(key) == 0 or keyword != ''):
+		return HttpResponse("Error: key cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT value FROM Properties WHERE label = \'" + key + "\';"
