@@ -268,12 +268,12 @@ def get_find(request):
 	query = "SELECT * FROM finds WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + ";"
 	cursor.execute(query)
 	response = 'longitude_decimal_degrees | latitude_decimal_degrees | utm_easting_meters | utm_northing_meters | material_general | material_specific | category_general |'
-	response = response + ' category_specific | weight_kilograms | interior_color_lightness_value | interior_color_chroma | weight_kilograms'
+	response = response + ' category_specific | weight_kilograms'
 	found = False
 	for findEntry in cursor.fetchall():
 		response = response + "\n" + str(findEntry[5])
 		# Skipping primary keys
-		for i in range(6, 13):
+		for i in range(6, 14):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
