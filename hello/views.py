@@ -213,7 +213,7 @@ def get_northings(request):
 # Get find numbers within an easting and northing
 # Param: request - HTTP client request
 # Returns an HTTP response
-def get_find_numbers(request):
+def get_finds(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	try:
@@ -262,7 +262,7 @@ def get_find(request):
 	try:
 		int(find)
 	except ValueError:
-		return HttpResponse('<h3>Provided find number is not a number', content_type = 'text/plain')
+		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT * FROM finds WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + ";"
