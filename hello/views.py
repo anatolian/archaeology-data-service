@@ -308,7 +308,7 @@ def get_find_colors(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-	query = query + " AND find_number = " + find + " AND color_location = \"" + location + "\";"
+	query = query + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
 	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
 	found = False
