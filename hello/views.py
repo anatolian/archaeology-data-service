@@ -285,44 +285,44 @@ def get_find(request):
 # Get colors from the database
 # Param: request - HTTP client request
 # Returns an HTTP response
-def get_find_colors(request):
-	easting = request.GET.get('easting', '')
-	northing = request.GET.get('northing', '')
-	location = request.GET.get('location', '')
-	locationSQL = find_sql_keyword(location)
-	find = request.GET.get('find', '')
-	try:
-		int(easting)
-	except ValueError:
-		return HttpResponse('Error: Provided easting is not a number', content_type = 'text/plain')
-	try:
-		int(northing)
-	except ValueError:
-		return HttpResponse('Error: Provided northing is not a number', content_type = 'text/plain')
-	try:
-		int(find)
-	except ValueError:
-		return HttpResponse('Error: Provided find number is not a number', content_type = 'text/plain')
-	if (len(location) == 0 or locationSQL != ""):
-		return HttpResponse('Error: Location must be non-empty and not contain SQL keywords', content_type = 'text/plain')
-	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
-	cursor = connection.cursor()
-	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-	query = query + " AND find_number = " + find + " AND color_location = " + location + ";"
-	cursor.execute(query)
-	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
-	found = False
-	for findEntry in cursor.fetchall():
-		response = response + "\n" + str(findEntry[5])
-		# Skipping primary keys
-		for i in range(6, 14):
-			response = response + " | " + str(findEntry[i])
-		found = True
-	if (not found):
-		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = ' + find + ' found in finds table'
-	cursor.close()
-	connection.close()
-	return HttpResponse(response, content_type = 'text/plain')
+# def get_find_colors(request):
+# 	easting = request.GET.get('easting', '')
+# 	northing = request.GET.get('northing', '')
+# 	location = request.GET.get('location', '')
+# 	locationSQL = find_sql_keyword(location)
+# 	find = request.GET.get('find', '')
+# 	try:
+# 		int(easting)
+# 	except ValueError:
+# 		return HttpResponse('Error: Provided easting is not a number', content_type = 'text/plain')
+# 	try:
+# 		int(northing)
+# 	except ValueError:
+# 		return HttpResponse('Error: Provided northing is not a number', content_type = 'text/plain')
+# 	try:
+# 		int(find)
+# 	except ValueError:
+# 		return HttpResponse('Error: Provided find number is not a number', content_type = 'text/plain')
+# 	if (len(location) == 0 or locationSQL != ""):
+# 		return HttpResponse('Error: Location must be non-empty and not contain SQL keywords', content_type = 'text/plain')
+# 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+# 	cursor = connection.cursor()
+# 	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+# 	query = query + " AND find_number = " + find + " AND color_location = " + location + ";"
+# 	cursor.execute(query)
+# 	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
+# 	found = False
+# 	for findEntry in cursor.fetchall():
+# 		response = response + "\n" + str(findEntry[5])
+# 		# Skipping primary keys
+# 		for i in range(6, 14):
+# 			response = response + " | " + str(findEntry[i])
+# 		found = True
+# 	if (not found):
+# 		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = ' + find + ' found in finds table'
+# 	cursor.close()
+# 	connection.close()
+# 	return HttpResponse(response, content_type = 'text/plain')
 
 # Set the weight of an object
 # Param: request - HTTP client request
