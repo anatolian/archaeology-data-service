@@ -315,7 +315,7 @@ def get_find_colors(request):
 	for findEntry in cursor.fetchall():
 		response = response + "\n" + str(findEntry[6])
 		# Skipping primary keys
-		for i in range(7, 12):
+		for i in range(7, 13):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
