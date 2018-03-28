@@ -175,7 +175,7 @@ def get_eastings(request):
 	for easting in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		eastingString = str(easting[0])
-		response = response + "<li><a href = '/get_northings/?easting=" + eastingString + "'>" + eastingString + "</a></li>"
+		response = response + "<li><a href = '/get_northings/?easting=" + eastingString + "'>N.35." + eastingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
@@ -201,7 +201,7 @@ def get_northings(request):
 	for northing in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		northingString = str(northing[0])
-		response = response + "<li><a href = '/get_finds/?easting=" + easting + "&northing=" + northingString + "'>" + easting + "." + northingString + "</a></li>"
+		response = response + "<li><a href = '/get_finds/?easting=" + easting + "&northing=" + northingString + "'>N.35." + easting + "." + northingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
@@ -234,7 +234,7 @@ def get_finds(request):
 	for find in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		findString = str(find[0])
-		response = response + "<li><a href = '/get_find/?easting=" + easting + "&northing=" + northing + "&find=" + findString + "'>"
+		response = response + "<li><a href = '/get_find/?easting=" + easting + "&northing=" + northing + "&find=" + findString + "'>N.35."
 		response = response + easting + "." + northing + "." + findString + "</a></li>"
 		found = True
 	response = response + "</ul>"
