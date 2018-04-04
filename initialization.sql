@@ -38,11 +38,17 @@ INSERT INTO finds VALUES ('N', 35, 654321, 567890, 2, 38.963, 35.243, 100.3, 27.
 -- 	PRIMARY KEY(utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number, color_location)
 -- );
 INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 1, 'interior', 10.2, 'R', 20.4, 12.0, 255, 0, 0);
-INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 2, 'exterior', 20.4, 'G', 10.2, 13.0, 0, 255, 0);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 1, 'exterior', 20.4, 'G', 10.2, 13.0, 0, 255, 0);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 2, 'interior', 10.2, 'B', 20, 1, 0, 0, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 567890, 2, 'exterior', 20.4, 'B', 3, 2, 0, 0, 255);
 INSERT INTO finds_colors VALUES ('N', 35, 123456, 098765, 1, 'interior', 10.2, 'R', 20.4, 14.0, 0, 0, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 123456, 098765, 1, 'exterior', 10.2, 'R', 20.4, 14.0, 0, 0, 255);
 INSERT INTO finds_colors VALUES ('N', 35, 654321, 098765, 1, 'interior', 10.2, 'R', 20.4, 15.0, 255, 0, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 098765, 1, 'exterior', 10.2, 'R', 3, 4, 255, 255, 255);
 INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 1, 'interior', 20.4, 'B', 10.2, 16.0, 255, 255, 0);
-INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 2, 'exterior', 10.2, 'R', 20.4, 17.0, 0, 255, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 1, 'exterior', 20.4, 'G', 10.2, 16.0, 255, 255, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 2, 'interior', 10.2, 'R', 20.4, 17.0, 0, 255, 255);
+INSERT INTO finds_colors VALUES ('N', 35, 654321, 567890, 2, 'exterior', 10.2, 'R', 20.3, 110, 0, 0, 0);
 DROP TABLE IF EXISTS Properties;
 CREATE TABLE Properties (
     label VARCHAR,
