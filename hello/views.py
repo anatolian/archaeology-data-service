@@ -119,7 +119,7 @@ def get_image_urls(request):
 	except ValueError:
 		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
 	s3 = boto3.resource('s3')
-	path = easting + '/' + northing + '/' + find + '/'
+	path = 'N/35/' + easting + '/' + northing + '/' + find + '/'
 	response = '<h3>Image URLs:</h3><ul>'
 	found = False
 	try:
