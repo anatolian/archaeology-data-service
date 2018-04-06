@@ -7,7 +7,7 @@ from django.template import RequestContext
 from django import forms
 from django.views.decorators.csrf import csrf_exempt
 import psycopg2
-import os, json#, boto3
+import os, json, boto3
 import logging
 logger = logging.getLogger('testlogger')
 # For local deployment, these should be defined in system environment variables.
