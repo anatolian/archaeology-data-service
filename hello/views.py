@@ -440,7 +440,7 @@ def get_next_find_id(request):
 		if ((values[0] >= int(easting)) and (values[1] >= int(northing)) and (values[2] > int(find))):
 			cursor.close()
 			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
+			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
@@ -469,7 +469,7 @@ def get_previous_find_id(request):
 		if ((values[0] <= int(easting)) and (values[1] <= int(northing)) and (values[2] < int(find))):
 			cursor.close()
 			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
+			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
