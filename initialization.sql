@@ -22,7 +22,7 @@ INSERT INTO finds VALUES ('N', 35, 654321, 098765, 1, 38.963, 35.243, 100.3, 27.
 INSERT INTO finds VALUES ('N', 35, 654321, 567890, 1, 38.963, 35.243, 100.3, 27.6, 'metal', 'silver', 'jewelry', 'necklace', 27.3);
 INSERT INTO finds VALUES ('N', 35, 654321, 567890, 2, 38.963, 35.243, 100.3, 27.6, 'ceramic', 'painted', 'pottery', 'bowl', 27.3);
 -- CREATE TABLE finds_colors (
--- 	utm_hemisphere CHARACTER(1),
+-- 	   utm_hemisphere CHARACTER(1),
 --     utm_zone INTEGER,
 --     context_utm_easting_meters INTEGER,
 --     context_utm_northing_meters INTEGER,
