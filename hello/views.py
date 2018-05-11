@@ -526,11 +526,11 @@ def set_color(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		query2 = "UPDATE finds_colors SET color_location = \'interior\', munsell_hue_number = 20, munsell_hue_letter = \'R\',"
+		query2 = "UPDATE finds_colors SET munsell_hue_number = 20, munsell_hue_letter = \'R\',"
 		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
 		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'N\' AND utm_zone = 35 AND "
 		query2 = query2 + "context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-		query2 = query2 + " AND find_number = " + find + ";"
+		query2 = query2 + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 		connection.rollback()
 		try:
 			cursor.execute(query2)
