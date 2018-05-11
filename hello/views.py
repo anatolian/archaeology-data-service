@@ -530,7 +530,7 @@ def set_color(request):
 		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
 		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'N\' AND utm_zone = 35 AND "
 		query2 = query2 + "context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-		query2 = query2 + " AND find_number = " + find + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ");"
+		query2 = query2 + " AND find_number = " + find + ";"
 		connection.rollback()
 		try:
 			cursor.execute(query2)
