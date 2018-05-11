@@ -420,7 +420,7 @@ def get_property(request):
 # Get the next item id
 # Param: request - HTTP request
 # Returns an HTTP response
-def get_next_item_id(request):
+def get_next_find_id(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
@@ -454,7 +454,7 @@ def get_next_item_id(request):
 # Get the previous item id
 # Param: request - HTTP request
 # Returns an HTTP response
-def get_previous_item_id(request):
+def get_previous_find_id(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
