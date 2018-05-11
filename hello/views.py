@@ -518,7 +518,7 @@ def set_color(request):
 	cursor = connection.cursor()
 	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + easting + ", " + northing + ", " + find + ", \'" + location
 	query = query + "\', 10.1, R, 20.2, 30.3, " + red + ", " + green + ", " + blue + ") ON DUPLICATE KEY UPDATE;"
-	response = None
+	response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
 	try:
 		cursor.execute(query)
 		# Make sure the query updated a row
