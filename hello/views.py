@@ -437,10 +437,13 @@ def get_next_find_id(request):
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if ((values[0] >= int(easting)) and (values[1] >= int(northing)) and (values[2] > int(find))):
-			cursor.close()
-			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
+		if (values[0] < int(easting)):
+			continue;
+		elif (values[0] == int(easting) and values[1] < int(northing)):
+			continue;
+		if (values[0] == int(easting) and values[1] == int(northing) and values[2] <= int(find)):
+			continue;
+		return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
@@ -466,10 +469,13 @@ def get_previous_find_id(request):
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if ((values[0] <= int(easting)) and (values[1] <= int(northing)) and (values[2] < int(find))):
-			cursor.close()
-			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
+		if (values[0] > int(easting)):
+			continue;
+		elif (values[0] == int(easting) and values[1] > int(northing)):
+			continue;
+		if (values[0] == int(easting) and values[1] == int(northing) and values[2] >= int(find)):
+			continue;
+		return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
