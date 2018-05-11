@@ -437,7 +437,7 @@ def get_next_find_id(request):
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if ((values[0] >= easting) and (values[1] >= northing) and (values[2] > find)):
+		if ((values[0] >= int(easting)) and (values[1] >= int(northing)) and (values[2] > int(find))):
 			cursor.close()
 			connection.close()
 			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
@@ -446,10 +446,10 @@ def get_next_find_id(request):
 	# If nothing is found, return the find
 	return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
 
-# Get the rpevious item id
+# Get the next item id
 # Param: request - HTTP request
 # Returns an HTTP response
-def get_previous_find_id(request):
+def get_next_find_id(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
@@ -466,7 +466,7 @@ def get_previous_find_id(request):
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if (values[0] <= easting and values[1] <= northing and values[2] < find):
+		if ((values[0] <= int(easting)) and (values[1] <= int(northing)) and (values[2] < int(find))):
 			cursor.close()
 			connection.close()
 			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
