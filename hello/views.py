@@ -437,19 +437,19 @@ def get_next_find_id(request):
 	query = query + "context_utm_northing_meters, find_number ASC) WHERE context_utm_northing_meters >= "
 	query = query + northing + ") WHERE find_number > " + find + ";"
 	try:
+		response = ""
 		cursor.execute(query)
 		# Just return the first
 		for values in cursor.fetchall():
-			cursor.close()
-			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = 'text/plain')
+			response = response + str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]) + "\n"
 	except (Exception, psycopg2.DatabaseError) as error:
 		response = HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
 	# If nothing is found, return the find
-	return HttpResponse(easting + "|" + northing + "|" + find);
+	# return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
+	return HttpResponse(response, content_type = "text/plain");
 
 # Get the previous item id
 # Param: request - HTTP request
