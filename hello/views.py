@@ -518,7 +518,7 @@ def set_color(request):
 	cursor = connection.cursor()
 	query = "INSERT INTO finds_colors VALUES (10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ") WHERE"
 	query = query + " utm_hemisphere = \'N\' AND utm_zone = 35 AND context_utm_easting_meters = " + easting
-	query = query + " AND context_utm_northing_meters = " + northing + " find_number = " + find + " color_location = "
+	query = query + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + " AND color_location = "
 	query = query + location + " ON DUPLICATE KEY UPDATE;"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
