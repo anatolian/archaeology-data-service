@@ -516,9 +516,8 @@ def set_color(request):
 		return HttpResponse("Error: location cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + int(easting) + ", " + int(northing) + ", " + int(find)
-	query = query + ", \'" + location + "\', 10.1, R, 20.2, 30.3, " + int(red) + ", " + int(green) + ", " + int(blue)
-	query = query + ") ON DUPLICATE KEY UPDATE;"
+	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + easting + ", " + northing + ", " + find + ", \'" + location
+	query = query + "\', 10.1, R, 20.2, 30.3, " + red + ", " + green + ", " + blue + ") ON DUPLICATE KEY UPDATE;"
 	response = None
 	try:
 		cursor.execute(query)
