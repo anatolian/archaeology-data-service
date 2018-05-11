@@ -520,12 +520,14 @@ def set_color(request):
 	query = query + " utm_hemisphere = \'N\' AND utm_zone = 35 AND context_utm_easting_meters = " + easting
 	query = query + " AND context_utm_northing_meters = " + northing + " find_number = " + find + " color_location = "
 	query = query + location + " ON DUPLICATE KEY UPDATE;"
-	response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
+	response = None
 	try:
 		cursor.execute(query)
 		# Make sure the query updated a row
 		if (cursor.rowcount == 1):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
+		else:
+			response = HttpResponse("Error: No records updated", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
 		response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
