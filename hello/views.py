@@ -432,24 +432,21 @@ def get_next_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM (SELECT * FROM (SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds WHERE "
-	query = query + "context_utm_easting_meters >= " + easting + " ORDER BY context_utm_easting_meters, "
-	query = query + "context_utm_northing_meters, find_number ASC) WHERE context_utm_northing_meters >= "
-	query = query + northing + ") WHERE find_number > " + find + ";"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters, "
+	query = query + "context_utm_northing_meters, find_number ASC;"
 	try:
-		response = ""
 		cursor.execute(query)
 		# Just return the first
 		for values in cursor.fetchall():
-			response = response + str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]) + "\n"
+			if (values[0] >= easting and values[1] >= northing and values[2] >= find):
+				return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" str(values[2]), content_type = "test/plain")
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
+		return HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
 	# If nothing is found, return the find
-	# return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
-	return HttpResponse(response, content_type = "text/plain");
+	return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
 
 # Get the previous item id
 # Param: request - HTTP request
@@ -466,10 +463,8 @@ def get_previous_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM (SELECT * FROM (SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds WHERE "
-	query = query + "context_utm_easting_meters <= " + easting + " ORDER BY context_utm_easting_meters, "
-	query = query + "context_utm_northing_meters, find_number DESC) WHERE context_utm_northing_meters <= "
-	query = query + northing + ") WHERE find_number < " + find + ";"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters, "
+	query = query + "context_utm_northing_meters, find_number DESC;"
 	try:
 		cursor.execute(query)
 		# Just return the first
