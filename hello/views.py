@@ -539,7 +539,7 @@ def set_color(request):
 				response = HttpResponse("Update successful", content_type = 'text/plain')
 			connection.commit()
 		except (Exception, psycopg2.DatabaseError) as error2:
-			response = HttpResponse("Error: Update failed " + error2.pgerror, content_type = "text/plain")
+			response = HttpResponse("Error: Update failed \n" + error.pgerror + "\n" + error2.pgerror, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
