@@ -517,18 +517,29 @@ def set_color(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + easting + ", " + northing + ", " + find + ", \'" + location
-	query = query + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ") ON DUPLICATE KEY UPDATE;"
+	query = query + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ");"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
 		# Make sure the query updated a row
 		if (cursor.rowcount == 1):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
-		else:
-			response = HttpResponse("Error: No records updated", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
+		query2 = "UPDATE finds_colors SET color_location = \'" + location + "\', munsell_hue_number = 20, munsell_hue_letter = \'R\',"
+		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
+		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'N\' AND utm_zone = 35 AND "
+		query2 = query2 + "context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+		query2 = query2 + " AND find_number = " + find + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ");"
+		connection.rollback()
+		try:
+			cursor.execute(query)
+			# Make sure the query updated a row
+			if (cursor.rowcount == 1):
+				response = HttpResponse("Update successful", content_type = 'text/plain')
+			connection.commit()
+		except (Exception, psycopg2.DatabaseError) as error2:
+			response = HttpResponse("Error: Update failed " + error2.pgerror, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
