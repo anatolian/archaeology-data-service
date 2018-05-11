@@ -520,7 +520,7 @@ def set_color(request):
 	query = query + " utm_hemisphere = \'N\' AND utm_zone = 35 AND context_utm_easting_meters = " + easting
 	query = query + " AND context_utm_northing_meters = " + northing + " find_number = " + find + " color_location = "
 	query = query + location + " ON DUPLICATE KEY UPDATE;"
-	response = None
+	response = HttpResponse("Error: No records updated", content_type = 'text/plain')
 	try:
 		cursor.execute(query)
 		# Make sure the query updated a row
