@@ -544,3 +544,52 @@ def set_color(request):
 		cursor.close()
 		connection.close()
 		return response
+		
+# Add an item
+# Param: request - HTTP request
+# Returns an HTTP response
+def insert_find(request):
+	zone = request.GET.get("zone", "");
+	hemisphere = request.GET.get("hemisphere", "");
+	easting = request.GET.get("easting", "");
+	northing = request.GET.get("northing", "");
+	find = request.GET.get("find", "");
+	latitude = request.GET.get("latitude", "");
+	longitude = request.GET.get("longitude", "");
+	altitude = request.GET.get("altitude", ""); # not used
+	status = request.GET.get("status", ""); # not used
+	category = request.GET.get("category", ""); 
+	comments = request.GET.get("comments", ""); # not used
+
+	try:
+		int(zone)
+		str(hemisphere)
+		int(easting)
+		int(northing)
+		int(find)
+		float(latitude)
+		float(longitude)
+		str(status)
+		str(category)
+		str(comments)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
+	if (find_sql_keyword(comments) != ''):
+		return HttpResponse("Error: comments cannot contain SQL keyword", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "INSERT INTO finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, latitude_decimal_degrees, longitude_decimal_degrees, category_general) VALUES (" + zone + ", " + hemisphere + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + category + "\');"
+	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
+	try:
+		cursor.execute(query)
+		# Make sure the query updated a row
+		if (cursor.rowcount == 1):
+			response = HttpResponse("Update successful", content_type = 'text/plain')
+		connection.commit()
+	except (Exception, psycopg2.DatabaseError) as error:
+		# What should we do here?
+		# Increase sample number to latest for this bucket and try again?
+	finally:
+		cursor.close()
+		connection.close()
+		return response
