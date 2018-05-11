@@ -15,5 +15,7 @@ urlpatterns = [
     url(r'^add_property', hello.views.add_property, name = 'Add Meta-variable'),
     url(r'^get_property', hello.views.get_property, name = 'Get Meta-variable'),
     url(r'^upload_file', hello.views.upload_file, name = 'Upload to S3'),
-    url(r'^get_image_urls', hello.views.get_image_urls, name = 'Get S3 URLs')
+    url(r'^get_image_urls', hello.views.get_image_urls, name = 'Get S3 URLs'),
+    url(r'^get_next_item_id', hello.views.get_next_image_id, name = 'Get next item ID'),
+    url(r'^get_previous_item_id', hello.views.get_previous_item_id, name = 'Get previous item ID')
 ]

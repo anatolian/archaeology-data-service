@@ -416,3 +416,71 @@ def get_property(request):
 	cursor.close()
 	connection.close()
 	return HttpResponse("Error: Property not found", content_type = 'text/plain')
+
+# Get the next item id
+# Param: request - HTTP request
+# Returns an HTTP response
+def get_next_item_id(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	find = request.GET.get('find', '')
+	try:
+		int(easting)
+		int(northing)
+		int(find)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT * FROM (SELECT * FROM (SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds WHERE "
+	query = query + "context_utm_easting_meters >= " + easting + " ORDER BY context_utm_easting_meters, "
+	query = query + "context_utm_northing_meters, find_number ASC) WHERE context_utm_northing_meters >= "
+	query = query + northing + ") WHERE find_number > " + find + ";"
+	try:
+		cursor.execute(query)
+		# Just return the first
+		for values in cursor.fetchall():
+			cursor.close()
+			connection.close()
+			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = 'text/plain')
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
+	finally:
+		cursor.close()
+		connection.close()
+	# If nothing is found, return the find
+	return HttpResponse(easting + "|" + northing + "|" + find);
+
+# Get the previous item id
+# Param: request - HTTP request
+# Returns an HTTP response
+def get_previous_item_id(request):
+	easting = request.GET.get('easting', '')
+	northing = request.GET.get('northing', '')
+	find = request.GET.get('find', '')
+	try:
+		int(easting)
+		int(northing)
+		int(find)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "SELECT * FROM (SELECT * FROM (SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds WHERE "
+	query = query + "context_utm_easting_meters <= " + easting + " ORDER BY context_utm_easting_meters, "
+	query = query + "context_utm_northing_meters, find_number DESC) WHERE context_utm_northing_meters <= "
+	query = query + northing + ") WHERE find_number < " + find + ";"
+	try:
+		cursor.execute(query)
+		# Just return the first
+		for values in cursor.fetchall():
+			cursor.close()
+			connection.close()
+			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = 'text/plain')
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
+	finally:
+		cursor.close()
+		connection.close()
+	# If nothing is found, just return the find
+	return HttpResponse(easting + "|" + northing + "|" + find);
