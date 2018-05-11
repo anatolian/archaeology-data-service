@@ -35,14 +35,16 @@ class UploadFileForm(forms.Form):
 # Param: text - string to search
 # Returns the found keyword, if any
 def find_sql_keyword(text):
-	keywords = [' ALL ', ' ALTER ', ' AND ', ' ANY ', ' ARRAY ', ' ARROW ', ' AS ', ' ASC ', ' AT ', ' BEGIN ', ' BETWEEN ', ' BY ', ' CASE ', ' CHECK ',\
-		' CLUSTERS ', ' CLUSTER ', ' COLAUTH ', ' COLUMNS ', ' COMPRESS ', ' CONNECT ', ' CRASH ', ' CREATE ', ' CURRENT ', ' DECIMAL ', ' DECLARE ',\
-		' DEFAULT ', ' DELETE ', ' DESC ', ' DISTINCT ', ' DROP ', ' ELSE ', ' END ', ' EXCEPTION ', ' EXCLUSIVE ', ' EXISTS ', ' FETCH ', ' FORM ', ' FOR ',\
-		' FROM ', ' GOTO ', ' GRANT ', ' GROUP ', ' HAVING ', ' IDENTIFIED ', ' IF ', ' IN ', ' INDEXES ', ' INDEX ', ' INSERT ', ' INTERSECT ', ' INTO ',\
-		' IS ', ' LIKE ', ' LOCK ', ' MINUS ', ' MODE ', ' NOCOMPRESS ', ' NOT ', ' NOWAIT ', ' NULL ', ' OF ', ' ON ', ' OPTION ', ' OR ', ' ORDER ',\
-		' OVERLAPS ', ' PRIOR ', ' PROCEDURE ', ' PUBLIC ', ' RANGE ', ' RECORD ', ' RESOURCE ', ' REVOKE ', ' SELECT ', ' SHARE ', ' SIZE ', ' SQL ',\
-		' START ', ' SUBTYPE ', ' TABAUTH ', ' TABLE ', ' THEN ', ' TO ', ' TYPE ', ' UNION ', ' UNIQUE ', ' UPDATE ', ' USE ', ' VALUES ', ' VIEW ', ' VIEWS '\
-		' WHEN ', ' WHERE ', ' WITH ', ' NATURAL ', ' JOIN ', ' INNER ', ' OUTER ']
+	keywords = [' ALL ', ' ALTER ', ' AND ', ' ANY ', ' ARRAY ', ' ARROW ', ' AS ', ' ASC ', ' AT ', ' BEGIN ', ' BETWEEN ',\
+		' BY ', ' CASE ', ' CHECK ', ' CLUSTERS ', ' CLUSTER ', ' COLAUTH ', ' COLUMNS ', ' COMPRESS ', ' CONNECT ', ' CRASH ',\
+		' CREATE ', ' CURRENT ', ' DECIMAL ', ' DECLARE ', ' DEFAULT ', ' DELETE ', ' DESC ', ' DISTINCT ', ' DROP ', ' ELSE ',\
+		' END ', ' EXCEPTION ', ' EXCLUSIVE ', ' EXISTS ', ' FETCH ', ' FORM ', ' FOR ', ' FROM ', ' GOTO ', ' GRANT ',\
+		' GROUP ', ' HAVING ', ' IDENTIFIED ', ' IF ', ' IN ', ' INDEXES ', ' INDEX ', ' INSERT ', ' INTERSECT ', ' INTO ',\
+		' IS ', ' LIKE ', ' LOCK ', ' MINUS ', ' MODE ', ' NOCOMPRESS ', ' NOT ', ' NOWAIT ', ' NULL ', ' OF ', ' ON ', ' OPTION ',\
+		' OR ', ' ORDER ', ' OVERLAPS ', ' PRIOR ', ' PROCEDURE ', ' PUBLIC ', ' RANGE ', ' RECORD ', ' RESOURCE ', ' REVOKE ',\
+		' SELECT ', ' SHARE ', ' SIZE ', ' SQL ', ' START ', ' SUBTYPE ', ' TABAUTH ', ' TABLE ', ' THEN ', ' TO ', ' TYPE ',\
+		' UNION ', ' UNIQUE ', ' UPDATE ', ' USE ', ' VALUES ', ' VIEW ', ' VIEWS ', ' WHEN ', ' WHERE ', ' WITH ', ' NATURAL ',\
+		' JOIN ', ' INNER ', ' OUTER ']
 	for keyword in keywords:
 		if (keyword in text.upper()):
 			return keyword
@@ -124,7 +126,8 @@ def get_image_urls(request):
 	found = False
 	try:
 		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key + "'>" + file.key + "</a></li>"
+			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key
+			response = response + "'>" + file.key + "</a></li>"
 			found = True
 		response = response + "</ul>"
 		if (not found):
@@ -195,13 +198,16 @@ def get_northings(request):
 		return HttpResponse('<h3>Provided easting is not a number</h3>', content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT DISTINCT context_utm_northing_meters FROM finds WHERE context_utm_easting_meters = " + easting + " ORDER BY context_utm_northing_meters ASC;")
+	query = "SELECT DISTINCT context_utm_northing_meters FROM finds WHERE context_utm_easting_meters = " + easting
+	query = query + " ORDER BY context_utm_northing_meters ASC;"
+	cursor.execute(query)
 	response = '<h3>Northings:</h3><ul>'
 	found = False
 	for northing in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		northingString = str(northing[0])
-		response = response + "<li><a href = '/get_finds/?easting=" + easting + "&northing=" + northingString + "'>N.35." + easting + "." + northingString + "</a></li>"
+		response = response + "<li><a href = '/get_finds/?easting=" + easting + "&northing=" + northingString + "'>N.35."
+		response = response + easting + "." + northingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
@@ -234,8 +240,8 @@ def get_finds(request):
 	for find in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		findString = str(find[0])
-		response = response + "<li><a href = '/get_find/?easting=" + easting + "&northing=" + northing + "&find=" + findString + "'>N.35."
-		response = response + easting + "." + northing + "." + findString + "</a></li>"
+		response = response + "<li><a href = '/get_find/?easting=" + easting + "&northing=" + northing + "&find="
+		response = response + findString + "'>N.35." + easting + "." + northing + "." + findString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
@@ -265,10 +271,11 @@ def get_find(request):
 		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + ";"
+	query = "SELECT * FROM finds WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
+	query = query + northing + " AND find_number = " + find + ";"
 	cursor.execute(query)
-	response = 'longitude_decimal_degrees | latitude_decimal_degrees | utm_easting_meters | utm_northing_meters | material_general | material_specific | category_general |'
-	response = response + ' category_specific | weight_kilograms'
+	response = 'longitude_decimal_degrees | latitude_decimal_degrees | utm_easting_meters | utm_northing_meters '
+	response = response + '| material_general | material_specific | category_general | category_specific | weight_kilograms'
 	found = False
 	for findEntry in cursor.fetchall():
 		response = response + "\n" + str(findEntry[5])
@@ -277,7 +284,8 @@ def get_find(request):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
-		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = ' + find + ' found in finds table'
+		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = '
+		response = response + find + ' found in finds table'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
@@ -307,10 +315,11 @@ def get_find_colors(request):
 		return HttpResponse('Error: Location must be non-empty and not contain SQL keywords', content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-	query = query + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
+	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
+	query = query + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
-	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
+	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | '
+	response = response + 'rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
 	found = False
 	for findEntry in cursor.fetchall():
 		response = response + "\n" + str(findEntry[6])
@@ -319,7 +328,8 @@ def get_find_colors(request):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
-		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = ' + find + ' found in finds table'
+		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = '
+		response = response + find + ' found in finds table'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
@@ -341,8 +351,8 @@ def set_weight(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "UPDATE finds SET weight_kilograms = " + weight + " WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
-	query = query + northing + " AND find_number = " + find + ';'
+	query = "UPDATE finds SET weight_kilograms = " + weight + " WHERE context_utm_easting_meters = " + easting
+	query = query + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + ';'
 	response = None
 	try:
 		cursor.execute(query)
@@ -432,8 +442,8 @@ def get_next_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters ASC, "
-	query = query + "context_utm_northing_meters ASC, find_number ASC;"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY "
+	query = query + "context_utm_easting_meters ASC, context_utm_northing_meters ASC, find_number ASC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
@@ -464,8 +474,8 @@ def get_previous_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters DESC, "
-	query = query + "context_utm_northing_meters DESC, find_number DESC;"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY "
+	query = query + "context_utm_easting_meters DESC, context_utm_northing_meters DESC, find_number DESC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
@@ -480,3 +490,45 @@ def get_previous_find_id(request):
 	connection.close()
 	# If nothing is found, return the find
 	return HttpResponse(easting + "." + northing + "." + find, content_type = "text/plain");
+
+# Update the item's color
+# Param: request - HTTP request
+# Returns an HTTP response
+def set_color(request):
+	easting = request.GET.get("easting", "");
+	northing = request.GET.get("northing", "");
+	find = request.GET.get("find", "");
+	red = request.GET.get("red", "");
+	green = request.GET.get("green", "");
+	blue = request.GET.get("blue", "");
+	location = request.GET.get("location", "");
+	try:
+		int(easting)
+		int(northing)
+		int(find)
+		int(red)
+		int(green)
+		int(blue)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
+	keyword = find_sql_keyword(location)
+	if (len(location) == 0 or keyword != ''):
+		return HttpResponse("Error: location cannot be empty or contain SQL keyword", content_type = 'text/plain')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + int(easting) + ", " + int(northing) + ", " + int(find)
+	query = query + ", \'" + location + "\', 10.1, R, 20.2, 30.3, " + int(red) + ", " + int(green) + ", " + int(blue)
+	query = query + ") ON DUPLICATE KEY UPDATE;"
+	response = None
+	try:
+		cursor.execute(query)
+		# Make sure the query updated a row
+		if (cursor.rowcount == 1):
+			response = HttpResponse("Update successful", content_type = 'text/plain')
+		connection.commit()
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Error: Insertion failed " + error2.pgerror, content_type = "text/plain")
+	finally:
+		cursor.close()
+		connection.close()
+		return response
