@@ -465,16 +465,14 @@ def get_previous_find_id(request):
 	cursor = connection.cursor()
 	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters, "
 	query = query + "context_utm_northing_meters, find_number DESC;"
-	try:
-		cursor.execute(query)
-		# Just return the first
-		for values in cursor.fetchall():
-			if (values[0] <= easting and values[1] <= northing and values[2] < find):
-				return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
-	except (Exception, psycopg2.DatabaseError) as error:
-		return HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
-	finally:
-		cursor.close()
-		connection.close()
+	cursor.execute(query)
+	# Just return the first
+	for values in cursor.fetchall():
+		if (values[0] <= easting and values[1] <= northing and values[2] < find):
+			cursor.close()
+			connection.close()
+			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
+	cursor.close()
+	connection.close()
 	# If nothing is found, return the find
 	return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
