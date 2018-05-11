@@ -438,8 +438,8 @@ def get_next_find_id(request):
 		cursor.execute(query)
 		# Just return the first
 		for values in cursor.fetchall():
-			if (values[0] >= easting and values[1] >= northing and values[2] >= find):
-				return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" str(values[2]), content_type = "test/plain")
+			if (values[0] >= easting and values[1] >= northing and values[2] > find):
+				return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
 	except (Exception, psycopg2.DatabaseError) as error:
 		return HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
 	finally:
@@ -448,7 +448,7 @@ def get_next_find_id(request):
 	# If nothing is found, return the find
 	return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
 
-# Get the previous item id
+# Get the rpevious item id
 # Param: request - HTTP request
 # Returns an HTTP response
 def get_previous_find_id(request):
@@ -469,13 +469,12 @@ def get_previous_find_id(request):
 		cursor.execute(query)
 		# Just return the first
 		for values in cursor.fetchall():
-			cursor.close()
-			connection.close()
-			return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = 'text/plain')
+			if (values[0] <= easting and values[1] <= northing and values[2] < find):
+				return HttpResponse(str(values[0]) + "|" + str(values[1]) + "|" + str(values[2]), content_type = "test/plain")
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
+		return HttpResponse("Error: Object not found in finds table", content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
-	# If nothing is found, just return the find
-	return HttpResponse(easting + "|" + northing + "|" + find);
+	# If nothing is found, return the find
+	return HttpResponse(easting + "|" + northing + "|" + find, content_type = "text/plain");
