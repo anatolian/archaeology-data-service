@@ -432,8 +432,8 @@ def get_next_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters, "
-	query = query + "context_utm_northing_meters, find_number ASC;"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters ASC, "
+	query = query + "context_utm_northing_meters ASC, find_number ASC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
@@ -464,8 +464,8 @@ def get_previous_find_id(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters, "
-	query = query + "context_utm_northing_meters, find_number DESC;"
+	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY context_utm_easting_meters DESC, "
+	query = query + "context_utm_northing_meters DESC, find_number DESC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
