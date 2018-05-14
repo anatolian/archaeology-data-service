@@ -25,6 +25,8 @@ DEFAULT_FILE_STORAGE = "storages.backends.s3boto.S3BotoStorage"
 # Model for testing that upload_image form is valid
 # Param: form - the POST request form
 class UploadFileForm(forms.Form):
+	hemisphere = forms.CharField(max_length = 1)
+	zone = forms.IntegerField(min_value = 0)
 	easting = forms.IntegerField(min_value = 0)
 	northing = forms.IntegerField(min_value = 0)
 	find = forms.IntegerField(min_value = 0)
@@ -57,10 +59,10 @@ def find_sql_keyword(text):
 def upload_file(request):
 	if (request.method == 'POST'):
 		# Store file to temporary location then upload to s3
-		logger.info('POST Detected')
 		form = UploadFileForm(request.POST, request.FILES)
 		if (form.is_valid()):
-			logger.info('Valid Form')
+			hemisphere = request.POST.get('hemisphere', '')
+			zone = request.POST.get('zone', '')
 			easting = request.POST.get('easting', '')
 			northing = request.POST.get('northing', '')
 			find = request.POST.get('find', '')
@@ -70,7 +72,7 @@ def upload_file(request):
 			# The form ensures the other fields must be integers
 			if (keyword != ''):
 				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file_name', content_type = 'text/plain')
-			path = 'N/35/' + easting + '/' + northing + '/' + find + '/'
+			path = hemisphere + "/" + str(zone) + "/" + easting + '/' + northing + '/' + find + '/'
 			file_type = file_name[file_name.find('.'):]
 			s3 = boto3.resource('s3')
 			try:
@@ -105,23 +107,21 @@ def upload_file(request):
 # Param request - HTTP client request
 # Returns an HTTP response
 def get_image_urls(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
+	if (len(hemisphere) != 1):
+		return HttpResponse('Error: Invalid parameter', content_type = 'text/plain')
 	try:
 		int(easting)
-	except ValueError:
-		return HttpResponse('Provided area easting is not a number', content_type = 'text/plain')
-	try:
 		int(northing)
-	except ValueError:
-		return HttpResponse('Provided area northing is not a number', content_type = 'text/plain')
-	try:
 		int(find)
 	except ValueError:
-		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
+		return HttpResponse('Error: Invalid parameter', content_type = 'text/plain')
 	s3 = boto3.resource('s3')
-	path = 'N/35/' + easting + '/' + northing + '/' + find + '/'
+	path = hemisphere + "/" + zone + "/" + easting + '/' + northing + '/' + find + '/'
 	response = '<h3>Image URLs:</h3><ul>'
 	found = False
 	try:
@@ -131,7 +131,7 @@ def get_image_urls(request):
 			found = True
 		response = response + "</ul>"
 		if (not found):
-			return HttpResponse('<h3>No images found</h3>', 'text/html')
+			return HttpResponse('<h3>Error: No images found</h3>', 'text/html')
 		return HttpResponse(response, 'text/html')
 	except (Exception, botocore.exceptions.ClientError):
 		return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
@@ -157,14 +157,34 @@ def test_connection(request):
 	connection.close()
 	if (not found):
 		return HttpResponse("Error: No tables found", content_type = 'text/plain')
-	# s3 = boto3.resource('s3')
-	# try:
-	# 	for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.all():
-	# 		return HttpResponse("Connected to S3", content_type = 'text/plain')
-	# 	return HttpResponse("Connected to S3, but bucket is empty", content_type = 'text/plain')
-	# except (Exception, botocore.exceptions.ClientError):
-	# 	return HttpResponse("Error: S3 Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+	s3 = boto3.resource('s3')
+	try:
+		s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.all()
+		return HttpResponse("Connected to S3", content_type = 'text/plain')
+	except (Exception, botocore.exceptions.ClientError):
+		return HttpResponse("Error: S3 Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 	return HttpResponse("Connections Established", content_type = 'text/plain')
+
+# Get the hemispheres from the database
+# Param: request - HTTP request
+# Returns an HTTP response
+def get_hemispheres(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT DISTINCT utm_hemisphere FROM finds ORDER BY utm_hemisphere ASC;")
+	response = '<h3>Hemispheres:</h3><ul>'
+	found = False
+	for hemisphere in cursor.fetchall():
+		# Python thinks this is a tuple of 1 element
+		hemisphereString = str(hemisphere[0])
+		response = response + "<li><a href = '/get_zones/?hemisphere=" + hemisphereString + "'>" + hemisphereString + "</a></li>"
+		found = True
+	response = response + "</ul>"
+	if (not found):
+		response = '<h3>Error: No hemispheres found in finds table</h3>'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/html')
 
 # Get the eastings in the database
 # Param: request - HTTP client request
