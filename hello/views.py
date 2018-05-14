@@ -580,7 +580,6 @@ def insert_find(request):
 	status = request.GET.get("status", ""); # not used
 	category = request.GET.get("category", ""); 
 	comments = request.GET.get("comments", ""); # not used
-
 	try:
 		int(zone)
 		str(hemisphere)
@@ -598,7 +597,9 @@ def insert_find(request):
 		return HttpResponse("Error: comments cannot contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, latitude_decimal_degrees, longitude_decimal_degrees, category_general) VALUES (" + zone + ", " + hemisphere + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + category + "\');"
+	query = "INSERT INTO finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, "
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, category_general) VALUES (" + zone + ", " + hemisphere
+	query = query + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + category + "\');"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
@@ -607,8 +608,7 @@ def insert_find(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		# What should we do here?
-		# Increase sample number to latest for this bucket and try again?
+		response = HttpResponse("Error: Update failed", content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
