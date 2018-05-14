@@ -98,9 +98,7 @@ def upload_file(request):
 			except (Exception, botocore.exceptions.ClientError):
 				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
 		else:
-			logger.info('Invalid Form')
 			form = UploadFileForm()
-	logger.info('Redirecting request to blank form')
 	return render(request, 'upload_image.html', {'form': form})
 
 # Route for fetching image urls
@@ -140,6 +138,10 @@ def get_image_urls(request):
 # Param: request - HTTP client request
 # Returns an HTML render
 def index(request):
+	logger.info(hostname)
+	logger.info(username)
+	logger.info(password)
+	logger.info(database)
 	return render(request, 'index.html')
 
 # Get the relation names in the database
@@ -608,7 +610,7 @@ def insert_find(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		response = HttpResponse("Error: Update failed", content_type = "text/plain")
+		response = HttpResponse("Error: Update failed\n" + error.pgerror, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
