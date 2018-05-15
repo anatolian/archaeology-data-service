@@ -235,8 +235,8 @@ def get_eastings(request):
 	for easting in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		eastingString = str(easting[0])
-		response = response + "<li><a href = '/get_northings/?hemisphere=" + hemisphere + "&zone=" + zone +
-		response = response + "easting=" + eastingString + "'>" + hemisphere + "." + zone
+		response = response + "<li><a href = '/get_northings/?hemisphere=" + hemisphere + "&zone=" + zone
+		response = response + "&easting=" + eastingString + "'>" + hemisphere + "." + zone
 		response = response + "." + eastingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
@@ -270,7 +270,7 @@ def get_northings(request):
 	for northing in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		northingString = str(northing[0])
-		response = response + "<li><a href = '/get_finds/?hemisphere=" + hemisphere + "&zone=" + zone + "easting="
+		response = response + "<li><a href = '/get_finds/?hemisphere=" + hemisphere + "&zone=" + zone + "&easting="
 		response = response + easting + "&northing=" + northingString + "'>" + hemisphere + "." + zone + "."
 		response = response + easting + "." + northingString + "</a></li>"
 		found = True
