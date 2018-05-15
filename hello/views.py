@@ -219,7 +219,7 @@ def get_zones(request):
 def get_eastings(request):
 	hemisphere = request.GET.get('hemisphere', '')
 	zone = request.GET.get('zone', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
@@ -253,7 +253,7 @@ def get_northings(request):
 	easting = request.GET.get('easting', '')
 	hemisphere = request.GET.get('hemisphere', '')
 	zone = request.GET.get('zone', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
@@ -289,7 +289,7 @@ def get_finds(request):
 	northing = request.GET.get('northing', '')
 	hemisphere = request.GET.get('hemisphere', '')
 	zone = request.GET.get('zone', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
@@ -328,7 +328,7 @@ def get_find(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
@@ -369,7 +369,7 @@ def get_find_colors(request):
 	location = request.GET.get('location', '')
 	locationSQL = find_sql_keyword(location)
 	find = request.GET.get('find', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	elif (locationSQL != ''):
 		return HttpResponse("<h3>Error: SQL keyword in location</h3>", content_type = 'text/html')
@@ -412,7 +412,7 @@ def set_weight(request):
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
 	weight = request.GET.get('weight', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
@@ -510,7 +510,7 @@ def get_next_find_id(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
@@ -549,7 +549,7 @@ def get_previous_find_id(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
@@ -592,7 +592,7 @@ def set_color(request):
 	green = request.GET.get("green", "");
 	blue = request.GET.get("blue", "");
 	location = request.GET.get("location", "");
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
@@ -655,7 +655,7 @@ def insert_find(request):
 	status = request.GET.get("status", ""); # not used
 	category = request.GET.get("category", ""); 
 	comments = request.GET.get("comments", ""); # not used
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
