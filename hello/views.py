@@ -203,7 +203,7 @@ def get_zones(request):
 	for zone in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		zoneString = str(zone[0])
-		response = response + "<li><a href = '/get_eastings/?hemisphere=" + easting + "&zone=" + zoneString + "'>"
+		response = response + "<li><a href = '/get_eastings/?hemisphere=" + hemisphere + "&zone=" + zoneString + "'>"
 		response = response + hemisphere + "." + zoneString + "</a></li>"
 		found = True
 	response = response + "</ul>"
@@ -489,7 +489,7 @@ def get_property(request):
 		return HttpResponse("Error: key cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT value FROM Properties WHERE label = \'" + key + "\';"
+	query = "SELECT value FROM options.procedure_properties WHERE label = \'" + key + "\';"
 	cursor.execute(query)
 	# There should only be one element in this cursor
 	for values in cursor.fetchall():
