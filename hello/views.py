@@ -382,7 +382,7 @@ def get_find_colors(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds_colors WHERE utm_hemisphere = " + hemisphere " AND utm_zone = " + zone
+	query = "SELECT * FROM finds_colors WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
 	query = query + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
