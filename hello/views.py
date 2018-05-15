@@ -193,7 +193,7 @@ def get_hemispheres(request):
 # Returns the HTTP response
 def get_zones(request):
 	hemisphere = request.GET.get('hemisphere', '')
-	if (len(hemisphere) != 0):
+	if (len(hemisphere) != 1):
 		return HttpResponse("</h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
@@ -620,7 +620,7 @@ def set_color(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		query2 = "UPDATE finds_colors SET munsell_hue_number = 20, munsell_hue_letter = \'R\',"
+		query2 = "UPDATE finds.finds_colors SET munsell_hue_number = 20, munsell_hue_letter = \'R\',"
 		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
 		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'" + hemisphere + "\' AND utm_zone = "
 		query2 = query2 + zone + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
