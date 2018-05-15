@@ -150,7 +150,7 @@ def index(request):
 def test_connection(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT relname FROM pg_stat_user_tables WHERE schemaname = 'public';")
+	cursor.execute("SELECT relname FROM pg_stat_user_tables WHERE schemaname = 'finds';")
 	found = False
 	# Just looking to see there is something here
 	for relname in cursor.fetchall():
@@ -173,7 +173,7 @@ def test_connection(request):
 def get_hemispheres(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT DISTINCT utm_hemisphere FROM finds ORDER BY utm_hemisphere ASC;")
+	cursor.execute("SELECT DISTINCT utm_hemisphere FROM finds.finds ORDER BY utm_hemisphere ASC;")
 	response = '<h3>Hemispheres:</h3><ul>'
 	found = False
 	for hemisphere in cursor.fetchall():
@@ -197,7 +197,7 @@ def get_zones(request):
 		return HttpResponse("</h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT DISTINCT utm_zone FROM finds WHERE utm_hemisphere = " + hemisphere + " ORDER BY utm_zone ASC;")
+	cursor.execute("SELECT DISTINCT utm_zone FROM finds.finds WHERE utm_hemisphere = " + hemisphere + " ORDER BY utm_zone ASC;")
 	response = '<h3>Zones:</h3><ul>'
 	found = False
 	for zone in cursor.fetchall():
@@ -227,7 +227,7 @@ def get_eastings(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT DISTINCT context_utm_easting_meters FROM finds WHERE utm_hemisphere = " + hemisphere
+	query = "SELECT DISTINCT context_utm_easting_meters FROM finds.finds WHERE utm_hemisphere = " + hemisphere
 	query = query + " AND utm_zone = " + zone + " ORDER BY context_utm_easting_meters ASC;"
 	cursor.execute()
 	response = '<h3>Eastings:</h3><ul>'
@@ -262,7 +262,7 @@ def get_northings(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT DISTINCT context_utm_northing_meters FROM finds WHERE utm_hemisphere = " + hemisphere + " AND zone = "
+	query = "SELECT DISTINCT context_utm_northing_meters FROM finds.finds WHERE utm_hemisphere = " + hemisphere + " AND zone = "
 	query = query + zone + " AND context_utm_easting_meters = " + easting + " ORDER BY context_utm_northing_meters ASC;"
 	cursor.execute(query)
 	response = '<h3>Northings:</h3><ul>'
@@ -299,7 +299,7 @@ def get_finds(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT find_number FROM finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = "SELECT find_number FROM finds.finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
 	query = query + " ORDER BY find_number ASC;"
 	cursor.execute(query)
@@ -339,7 +339,7 @@ def get_find(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = "SELECT * FROM finds.finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
 	query = query + " AND find_number = " + find + ";"
 	cursor.execute(query)
@@ -382,7 +382,7 @@ def get_find_colors(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds_colors WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = "SELECT * FROM finds.finds_colors WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
 	query = query + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
@@ -424,7 +424,7 @@ def set_weight(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "UPDATE finds SET weight_kilograms = " + weight + " WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = "UPDATE finds.finds SET weight_kilograms = " + weight + " WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
 	query = query + " AND find_number = " + find + ';'
 	response = None
@@ -522,7 +522,7 @@ def get_next_find_id(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number"
-	query = query + " FROM finds ORDER BY utm_hemisphere ASC, utm_zone ASC, context_utm_easting_meters ASC,"
+	query = query + " FROM finds.finds ORDER BY utm_hemisphere ASC, utm_zone ASC, context_utm_easting_meters ASC,"
 	query = query + " context_utm_northing_meters ASC, find_number ASC;"
 	cursor.execute(query)
 	# Just return the first
@@ -561,7 +561,7 @@ def get_previous_find_id(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "SELECT utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number"
-	query = query + " FROM finds ORDER BY utm_hemisphere DESC, utm_zone DESC, context_utm_easting_meters DESC,"
+	query = query + " FROM finds.finds ORDER BY utm_hemisphere DESC, utm_zone DESC, context_utm_easting_meters DESC,"
 	query = query + " context_utm_northing_meters DESC, find_number DESC;"
 	cursor.execute(query)
 	# Just return the first
@@ -609,8 +609,9 @@ def set_color(request):
 		return HttpResponse("Error: location cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO finds_colors VALUES (\'N\', 35, " + easting + ", " + northing + ", " + find + ", \'" + location
-	query = query + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", " + green + ", " + blue + ");"
+	query = "INSERT INTO finds.finds_colors VALUES (\'" + hemisphere + "\', " + zone + ", " + easting + ", "
+	query = query + northing + ", " + find + ", \'" + location + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", "
+	query = query + green + ", " + blue + ");"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
