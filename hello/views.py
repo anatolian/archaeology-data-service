@@ -124,8 +124,8 @@ def get_image_urls(request):
 	found = False
 	try:
 		for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key
-			response = response + "'>" + file.key + "</a></li>"
+			response = response + "<li><a href = 'https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + file.key + "'>"
+			response = response + file.key + "</a></li>"
 			found = True
 		response = response + "</ul>"
 		if (not found):
@@ -188,19 +188,56 @@ def get_hemispheres(request):
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
 
+# Get the zones
+# Param: request - HTTP request
+# Returns the HTTP response
+def get_zones(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("</h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT DISTINCT utm_zone FROM finds WHERE utm_hemisphere = " + hemisphere + " ORDER BY utm_zone ASC;")
+	response = '<h3>Zones:</h3><ul>'
+	found = False
+	for zone in cursor.fetchall():
+		# Python thinks this is a tuple of 1 element
+		zoneString = str(zone[0])
+		response = response + "<li><a href = '/get_eastings/?hemisphere=" + easting + "&zone=" + zoneString + "'>"
+		response = response + hemisphere + "." + zoneString + "</a></li>"
+		found = True
+	response = response + "</ul>"
+	if (not found):
+		response = '<h3>Error: No zones found in finds table</h3>'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/html')
+
 # Get the eastings in the database
 # Param: request - HTTP client request
 # Returns an HTTP response
 def get_eastings(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
+	try:
+		int(zone)
+	except ValueError:
+		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT DISTINCT context_utm_easting_meters FROM finds ORDER BY context_utm_easting_meters ASC;")
+	query = "SELECT DISTINCT context_utm_easting_meters FROM finds WHERE utm_hemisphere = " + hemisphere
+	query = query + " AND utm_zone = " + zone + " ORDER BY context_utm_easting_meters ASC;"
+	cursor.execute()
 	response = '<h3>Eastings:</h3><ul>'
 	found = False
 	for easting in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		eastingString = str(easting[0])
-		response = response + "<li><a href = '/get_northings/?easting=" + eastingString + "'>N.35." + eastingString + "</a></li>"
+		response = response + "<li><a href = '/get_northings/?hemisphere=" + hemisphere + "&zone=" + zone +
+		response = response + "easting=" + eastingString + "'>" + hemisphere + "." + zone
+		response = response + "." + eastingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
@@ -214,26 +251,32 @@ def get_eastings(request):
 # Returns an HTTP response
 def get_northings(request):
 	easting = request.GET.get('easting', '')
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
+		int(zone)
 		int(easting)
 	except ValueError:
-		return HttpResponse('<h3>Provided easting is not a number</h3>', content_type = 'text/html')
+		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT DISTINCT context_utm_northing_meters FROM finds WHERE context_utm_easting_meters = " + easting
-	query = query + " ORDER BY context_utm_northing_meters ASC;"
+	query = "SELECT DISTINCT context_utm_northing_meters FROM finds WHERE utm_hemisphere = " + hemisphere + " AND zone = "
+	query = query + zone + " AND context_utm_easting_meters = " + easting + " ORDER BY context_utm_northing_meters ASC;"
 	cursor.execute(query)
 	response = '<h3>Northings:</h3><ul>'
 	found = False
 	for northing in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		northingString = str(northing[0])
-		response = response + "<li><a href = '/get_finds/?easting=" + easting + "&northing=" + northingString + "'>N.35."
+		response = response + "<li><a href = '/get_finds/?hemisphere=" + hemisphere + "&zone=" + zone + "easting="
+		response = response + easting + "&northing=" + northingString + "'>" + hemisphere + "." + zone + "."
 		response = response + easting + "." + northingString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
-		response = '<h3>Error: No northings with easting = ' + easting + ' found in finds table</h3>'
+		response = '<h3>Error: No northings found</h3>'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
@@ -244,30 +287,34 @@ def get_northings(request):
 def get_finds(request):
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
+		int(zone)
 		int(easting)
-	except ValueError:
-		return HttpResponse('<h3>Provided easting is not a number</h3>', content_type = 'text/html')
-	try:
 		int(northing)
 	except ValueError:
-		return HttpResponse('<h3>Provided northing is not a number</h3>', content_type = 'text/html')
+		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT find_number FROM finds WHERE context_utm_easting_meters = " + easting
-	query = query + " AND context_utm_northing_meters = " + northing + " ORDER BY find_number ASC;"
+	query = "SELECT find_number FROM finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+	query = query + " ORDER BY find_number ASC;"
 	cursor.execute(query)
 	response = '<h3>Find Numbers:</h3><ul>'
 	found = False
 	for find in cursor.fetchall():
 		# Python thinks this is a tuple of 1 element
 		findString = str(find[0])
-		response = response + "<li><a href = '/get_find/?easting=" + easting + "&northing=" + northing + "&find="
-		response = response + findString + "'>N.35." + easting + "." + northing + "." + findString + "</a></li>"
+		response = response + "<li><a href = '/get_find/?hemisphere=" + hemisphere + "&zone=" + zone + "&easting="
+		response = response + easting + "&northing=" + northing + "&find=" + findString + "'>" + hemisphere + "." + zone
+		response = response + "." + easting + "." + northing + "." + findString + "</a></li>"
 		found = True
 	response = response + "</ul>"
 	if (not found):
-		response = '<h3>Error: No finds with easting = ' + easting + ' and northing = ' + northing + ' found in finds table</h3>'
+		response = '<h3>Error: No finds found</h3>'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/html')
@@ -276,25 +323,25 @@ def get_finds(request):
 # Param: request - HTTP client request
 # Returns an HTTP response
 def get_find(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
+		int(zone)
 		int(easting)
-	except ValueError:
-		return HttpResponse('Provided easting is not a number', content_type = 'text/plain')
-	try:
 		int(northing)
-	except ValueError:
-		return HttpResponse('Provided northing is not a number', content_type = 'text/plain')
-	try:
 		int(find)
 	except ValueError:
-		return HttpResponse('Provided find number is not a number', content_type = 'text/plain')
+		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
-	query = query + northing + " AND find_number = " + find + ";"
+	query = "SELECT * FROM finds WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+	query = query + " AND find_number = " + find + ";"
 	cursor.execute(query)
 	response = 'longitude_decimal_degrees | latitude_decimal_degrees | utm_easting_meters | utm_northing_meters '
 	response = response + '| material_general | material_specific | category_general | category_specific | weight_kilograms'
@@ -306,8 +353,7 @@ def get_find(request):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
-		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = '
-		response = response + find + ' found in finds table'
+		response = 'Error: No finds found'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
@@ -316,28 +362,28 @@ def get_find(request):
 # Param: request - HTTP client request
 # Returns an HTTP response
 def get_find_colors(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	location = request.GET.get('location', '')
 	locationSQL = find_sql_keyword(location)
 	find = request.GET.get('find', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
+	elif (locationSQL != ''):
+		return HttpResponse("<h3>Error: SQL keyword in location</h3>", content_type = 'text/html')
 	try:
+		int(zone)
 		int(easting)
-	except ValueError:
-		return HttpResponse('Error: Provided easting is not a number', content_type = 'text/plain')
-	try:
 		int(northing)
-	except ValueError:
-		return HttpResponse('Error: Provided northing is not a number', content_type = 'text/plain')
-	try:
 		int(find)
 	except ValueError:
-		return HttpResponse('Error: Provided find number is not a number', content_type = 'text/plain')
-	if (len(location) == 0 or locationSQL != ""):
-		return HttpResponse('Error: Location must be non-empty and not contain SQL keywords', content_type = 'text/plain')
+		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT * FROM finds_colors WHERE context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
+	query = "SELECT * FROM finds_colors WHERE utm_hemisphere = " + hemisphere " AND utm_zone = " + zone
+	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
 	query = query + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
 	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | '
@@ -360,11 +406,16 @@ def get_find_colors(request):
 # Param: request - HTTP client request
 # Returns an HTTP response
 def set_weight(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
 	weight = request.GET.get('weight', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
+		int(zone)
 		int(easting)
 		int(northing)
 		int(find)
@@ -373,8 +424,9 @@ def set_weight(request):
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "UPDATE finds SET weight_kilograms = " + weight + " WHERE context_utm_easting_meters = " + easting
-	query = query + " AND context_utm_northing_meters = " + northing + " AND find_number = " + find + ';'
+	query = "UPDATE finds SET weight_kilograms = " + weight + " WHERE utm_hemisphere = " + hemisphere + " AND utm_zone = " + zone
+	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+	query = query + " AND find_number = " + find + ';'
 	response = None
 	try:
 		cursor.execute(query)
@@ -453,70 +505,86 @@ def get_property(request):
 # Param: request - HTTP request
 # Returns an HTTP response
 def get_next_find_id(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
 		int(northing)
 		int(find)
+		int(zone)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY "
-	query = query + "context_utm_easting_meters ASC, context_utm_northing_meters ASC, find_number ASC;"
+	query = "SELECT utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number"
+	query = query + " FROM finds ORDER BY utm_hemisphere ASC, utm_zone ASC, context_utm_easting_meters ASC,"
+	query = query + " context_utm_northing_meters ASC, find_number ASC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if (values[0] < int(easting)):
+		if (values[2] < int(easting)):
 			continue;
-		elif (values[0] == int(easting) and values[1] < int(northing)):
+		elif (values[2] == int(easting) and values[3] < int(northing)):
 			continue;
-		if (values[0] == int(easting) and values[1] == int(northing) and values[2] <= int(find)):
+		if (values[2] == int(easting) and values[3] == int(northing) and values[4] <= int(find)):
 			continue;
-		return HttpResponse(str(values[0]) + "." + str(values[1]) + "." + str(values[2]), content_type = "text/plain")
+		response = values[0] + "." + str(values[1]) + "." + str(values[2]) + "." + str(values[3]) + "." + str(values[4])
+		return HttpResponse(response, content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
-	return HttpResponse(easting + "." + northing + "." + find, content_type = "text/plain");
+	return HttpResponse(hemisphere + "." + zone + "." + easting + "." + northing + "." + find, content_type = "text/plain");
 
 # Get the next item id
 # Param: request - HTTP request
 # Returns an HTTP response
 def get_previous_find_id(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get('easting', '')
 	northing = request.GET.get('northing', '')
 	find = request.GET.get('find', '')
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
 		int(northing)
 		int(find)
+		int(zone)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT context_utm_easting_meters, context_utm_northing_meters, find_number FROM finds ORDER BY "
-	query = query + "context_utm_easting_meters DESC, context_utm_northing_meters DESC, find_number DESC;"
+	query = "SELECT utm_hemisphere, utm_zone, context_utm_easting_meters, context_utm_northing_meters, find_number"
+	query = query + " FROM finds ORDER BY utm_hemisphere DESC, utm_zone DESC, context_utm_easting_meters DESC,"
+	query = query + " context_utm_northing_meters DESC, find_number DESC;"
 	cursor.execute(query)
 	# Just return the first
 	for values in cursor.fetchall():
-		if (values[0] > int(easting)):
+		if (values[2] > int(easting)):
 			continue;
-		elif (values[0] == int(easting) and values[1] > int(northing)):
+		elif (values[2] == int(easting) and values[3] > int(northing)):
 			continue;
-		if (values[0] == int(easting) and values[1] == int(northing) and values[2] >= int(find)):
+		if (values[2] == int(easting) and values[3] == int(northing) and values[4] >= int(find)):
 			continue;
-		return HttpResponse(str(values[0]) + "." + str(values[1]) + "." + str(values[2]), content_type = "text/plain")
+		response = values[0] + "." + str(values[1]) + "." + str(values[2]) + "." + str(values[3]) + "." + str(values[4])
+		return HttpResponse(response, content_type = "text/plain")
 	cursor.close()
 	connection.close()
 	# If nothing is found, return the find
-	return HttpResponse(easting + "." + northing + "." + find, content_type = "text/plain");
+	return HttpResponse(hemisphere + "." + zone + "." + easting + "." + northing + "." + find, content_type = "text/plain");
 
 # Update the item's color
 # Param: request - HTTP request
 # Returns an HTTP response
 def set_color(request):
+	hemisphere = request.GET.get('hemisphere', '')
+	zone = request.GET.get('zone', '')
 	easting = request.GET.get("easting", "");
 	northing = request.GET.get("northing", "");
 	find = request.GET.get("find", "");
@@ -524,6 +592,8 @@ def set_color(request):
 	green = request.GET.get("green", "");
 	blue = request.GET.get("blue", "");
 	location = request.GET.get("location", "");
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(easting)
 		int(northing)
@@ -531,6 +601,7 @@ def set_color(request):
 		int(red)
 		int(green)
 		int(blue)
+		int(zone)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
 	keyword = find_sql_keyword(location)
@@ -550,8 +621,8 @@ def set_color(request):
 	except (Exception, psycopg2.DatabaseError) as error:
 		query2 = "UPDATE finds_colors SET munsell_hue_number = 20, munsell_hue_letter = \'R\',"
 		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
-		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'N\' AND utm_zone = 35 AND "
-		query2 = query2 + "context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
+		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'" + hemisphere + "\' AND utm_zone = "
+		query2 = query2 + zone + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
 		query2 = query2 + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 		connection.rollback()
 		try:
@@ -561,7 +632,8 @@ def set_color(request):
 				response = HttpResponse("Update successful", content_type = 'text/plain')
 			connection.commit()
 		except (Exception, psycopg2.DatabaseError) as error2:
-			response = HttpResponse("Error: Update failed \n" + query + "\n" + error.pgerror + "\n" + query2 + "\n" + error2.pgerror, content_type = "text/plain")
+			response = "Error: Update failed \n" + query + "\n" + error.pgerror + "\n" + query2 + "\n" + error2.pgerror
+			response = HttpResponse(response, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
@@ -582,6 +654,8 @@ def insert_find(request):
 	status = request.GET.get("status", ""); # not used
 	category = request.GET.get("category", ""); 
 	comments = request.GET.get("comments", ""); # not used
+	if (len(hemisphere) != 0):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
 		str(hemisphere)
