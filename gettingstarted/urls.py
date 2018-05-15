@@ -6,6 +6,8 @@ import hello.views
 urlpatterns = [
 	url(r'^$', hello.views.index, name = 'index'),
 	url(r'^test_connection', hello.views.test_connection, name = 'Test Connections'),
+	url(r'^get_hemispheres', hello.views.get_hemispheres, name = "Get Hemispheres"),
+	url(r'^get_zones', hello.views.get_zones, name = "Get Zones"),
 	url(r'^get_eastings', hello.views.get_eastings, name = 'Fetch Eastings'),
 	url(r'^get_northings', hello.views.get_northings, name = 'Fetch Northings'),
 	url(r'^get_finds', hello.views.get_finds, name = 'Fetch Finds'),
