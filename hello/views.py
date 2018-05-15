@@ -387,8 +387,8 @@ def get_find_colors(request):
 	query = query + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
 	query = query + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 	cursor.execute(query)
-	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma | '
-	response = response + 'rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
+	response = 'munsell_hue_number | munsell_hue_letter | munsell_lightness_value | munsell_chroma |'
+	response = response + ' rgb_red_256_bit | rgb_green_256_bit | rgb_blue_256_bit'
 	found = False
 	for findEntry in cursor.fetchall():
 		response = response + "\n" + str(findEntry[6])
@@ -397,8 +397,7 @@ def get_find_colors(request):
 			response = response + " | " + str(findEntry[i])
 		found = True
 	if (not found):
-		response = 'Error: No finds with easting = ' + easting + ', northing = ' + northing + ', and find_number = '
-		response = response + find + ' found in finds table'
+		response = 'Error: find not found'
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
@@ -490,7 +489,7 @@ def get_property(request):
 		return HttpResponse("Error: key cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT value FROM options.procedure_properties WHERE label = \'" + key + "\';"
+	query = "SELECT property_value FROM options.procedure_properties WHERE property_name = \'" + key + "\';"
 	cursor.execute(query)
 	# There should only be one element in this cursor
 	for values in cursor.fetchall():
@@ -605,14 +604,29 @@ def set_color(request):
 		int(zone)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
+	newRed = int(red)
+	newGreen = int(green)
+	newBlue = int(blue)
 	keyword = find_sql_keyword(location)
 	if (len(location) == 0 or keyword != ''):
 		return HttpResponse("Error: location cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO finds.finds_colors VALUES (\'" + hemisphere + "\', " + zone + ", " + easting + ", "
-	query = query + northing + ", " + find + ", \'" + location + "\', 10.1, \'R\', 20.2, 30.3, " + red + ", "
-	query = query + green + ", " + blue + ");"
+	cursor.execute("SELECT * FROM options.munsell_colors;")
+	minDistance = 999999999.0
+	closest = []
+	for color in cursor.fetchall():
+		# Python thinks this is a tuple of 1 element
+		redByte = int(color[4])
+		greenByte = int(color[5])
+		blueByte = int(color[6])
+		distance = math.pow(newRed - redByte, 2) + math.pow(newGreen - greenByte, 2) + math.pow(newBlue - blueByte, 2)
+		if (distance < minDistance):
+			minDistance = distance
+			closest = color
+	query = "INSERT INTO finds.finds_colors VALUES (\'" + hemisphere + "\', " + zone + ", " + easting + ", " + northing + ", "
+	query = query + find + ", \'" + location + "\', " + str(closest[0]) + ", \'" + closest[1] + "\', " + str(closest[2]) + ", "
+	query = query + str(closest[3]) + ", " + red + ", " + green + ", " + blue + ");"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
@@ -621,11 +635,11 @@ def set_color(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		query2 = "UPDATE finds.finds_colors SET munsell_hue_number = 20, munsell_hue_letter = \'R\',"
-		query2 = query2 + " munsell_lightness_value = 30, munsell_chroma = 40, rgb_red_256_bit = " + red + ", rgb_green_256_bit = "
+		query2 = "UPDATE finds.finds_colors SET munsell_hue_number = " + str(closest[0]) + ", munsell_hue_letter = \'" + closest[1] + "\',"
+		query2 = query2 + " munsell_lightness_value = " + str(closest[2]) + ", munsell_chroma = " + closest[3] + ", rgb_red_256_bit = "
 		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'" + hemisphere + "\' AND utm_zone = "
-		query2 = query2 + zone + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = " + northing
-		query2 = query2 + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
+		query2 = query2 + red + ", rgb_green_256_bit = " + zone + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
+		query2 = query2 + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 		connection.rollback()
 		try:
 			cursor.execute(query2)
