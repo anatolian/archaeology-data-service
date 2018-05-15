@@ -229,7 +229,7 @@ def get_eastings(request):
 	cursor = connection.cursor()
 	query = "SELECT DISTINCT context_utm_easting_meters FROM finds.finds WHERE utm_hemisphere = \'" + hemisphere
 	query = query + "\' AND utm_zone = " + zone + " ORDER BY context_utm_easting_meters ASC;"
-	cursor.execute()
+	cursor.execute(query)
 	response = '<h3>Eastings:</h3><ul>'
 	found = False
 	for easting in cursor.fetchall():
