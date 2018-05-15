@@ -464,7 +464,7 @@ def add_property(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		query = "UPDATE options.procedure_properties SET value = \'" + value + "\' WHERE label = \'" + key + "\';"
+		query = "UPDATE options.procedure_properties SET property_value = \'" + value + "\' WHERE property_name = \'" + key + "\';"
 		connection.rollback()
 		try:
 			cursor.execute(query)
