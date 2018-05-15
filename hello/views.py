@@ -262,8 +262,9 @@ def get_northings(request):
 		return HttpResponse("<h3>Error: Invalid Parameter</h3>", content_type = 'text/html')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "SELECT DISTINCT context_utm_northing_meters FROM finds.finds WHERE utm_hemisphere = \'" + hemisphere + "\' AND zone = "
-	query = query + zone + " AND context_utm_easting_meters = " + easting + " ORDER BY context_utm_northing_meters ASC;"
+	query = "SELECT DISTINCT context_utm_northing_meters FROM finds.finds WHERE utm_hemisphere = \'" + hemisphere
+	query = query + "\' AND utm_zone = " + zone + " AND context_utm_easting_meters = " + easting
+	query = query + " ORDER BY context_utm_northing_meters ASC;"
 	cursor.execute(query)
 	response = '<h3>Northings:</h3><ul>'
 	found = False
