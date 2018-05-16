@@ -625,8 +625,8 @@ def set_color(request):
 	query = query + find + ", \'" + location + "\', " + str(closest[0]) + ", \'" + closest[1] + "\', " + str(closest[2]) + ", "
 	query = query + str(closest[3]) + ", " + red + ", " + green + ", " + blue + ") ON CONFLICT (hemisphere, zone, easting, northing, find, location)"
 	query = query + " DO UPDATE finds.finds_colors SET munsell_hue_number = EXCLUDED.munsell_hue_number, munsell_hue_letter = EXCLUDED.munsell_hue_letter,"
-	query2 = query2 + " munsell_lightness_value = EXCLUDED.munsell_lightness_value, munsell_chroma = EXCLUDED.munsell_chroma, rgb_red_256_bit = "
-	query2 = query2 + "EXCLUDED.rgb_red_256_bit, rgb_green_256_bit = EXCLUDED.rgb_green_256_bit, rgb_blue_256_bit = EXCLUDED.rgb_blue_256_bit;"
+	query = query + " munsell_lightness_value = EXCLUDED.munsell_lightness_value, munsell_chroma = EXCLUDED.munsell_chroma, rgb_red_256_bit = "
+	query = query + "EXCLUDED.rgb_red_256_bit, rgb_green_256_bit = EXCLUDED.rgb_green_256_bit, rgb_blue_256_bit = EXCLUDED.rgb_blue_256_bit;"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
