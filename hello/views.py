@@ -57,9 +57,6 @@ def find_sql_keyword(text):
 # Returns an HTTP response
 @csrf_exempt
 def upload_file(request):
-	logger.info(request)
-	logger.info(request.POST)
-	logger.info(request.FILES)
 	# Store file to temporary location then upload to s3
 	form = UploadFileForm(request.POST, request.FILES)
 	if (form.is_valid()):
@@ -71,20 +68,11 @@ def upload_file(request):
 		file_name = request.POST.get('file_name', '')
 		file = request.FILES.get('myFile', '');
 		keyword = find_sql_keyword(file_name)
-		logger.info("Hemisphere: " + hemisphere)
-		logger.info("Zone: " + str(zone))
-		logger.info("Easting: " + str(easting))
-		logger.info("Northing: " + str(northing))
-		logger.info("Find: " + str(find))
-		logger.info("File name: " + file_name)
-		logger.info("Keyword: " + keyword)
 		# The form ensures the other fields must be integers
 		if (keyword != ''):
 			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file name', content_type = 'text/plain')
 		path = hemisphere + "/" + str(zone) + "/" + str(easting) + '/' + str(northing) + '/' + str(find) + '/'
-		logger.info(path)
 		file_type = file_name[file_name.find('.'):]
-		logger.info("File Type: " + file_type)
 		s3 = boto3.resource('s3')
 		try:
 			# Store the file from multi-part to Heroku Ephemeral File System
@@ -99,7 +87,6 @@ def upload_file(request):
 					imageNumber = number
 			# Store the image on S3
 			path = path + str(imageNumber + 1) + file_type
-			logger.info("Path: " + path)
 			data = open('image' + file_type, 'rb')
 			s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
 			return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
