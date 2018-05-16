@@ -9,6 +9,7 @@ from django.views.decorators.csrf import csrf_exempt
 import psycopg2
 import os, json, boto3
 import logging
+import math
 logger = logging.getLogger('testlogger')
 # For local deployment, these should be defined in system environment variables.
 # For Heroku deployment, these must be set in the configuration
