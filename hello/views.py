@@ -57,59 +57,57 @@ def find_sql_keyword(text):
 # Returns an HTTP response
 @csrf_exempt
 def upload_file(request):
-	if (request.method == 'POST'):
-		# Store file to temporary location then upload to s3
-		form = UploadFileForm(request.POST, request.FILES)
-		if (form.is_valid()):
-			hemisphere = request.POST.get('hemisphere', '')
-			zone = request.POST.get('zone', '')
-			easting = request.POST.get('easting', '')
-			northing = request.POST.get('northing', '')
-			find = request.POST.get('find', '')
-			file_name = request.POST.get('file_name', '')
-			file = request.FILES.get('myFile', '');
-			keyword = find_sql_keyword(file_name)
-			logger.info("Hemisphere: " + hemisphere)
-			logger.info("Zone: " + str(zone))
-			logger.info("Easting: " + str(easting))
-			logger.info("Northing: " + str(northing))
-			logger.info("Find: " + str(find))
-			logger.info("File name: " + file_name)
-			logger.info("Keyword: " + keyword)
-			# The form ensures the other fields must be integers
-			if (keyword != ''):
-				return HttpResponse('SQL keyword ' + keyword + ' not allowed in file name', content_type = 'text/plain')
-			path = hemisphere + "/" + str(zone) + "/" + str(easting) + '/' + str(northing) + '/' + str(find) + '/'
-			logger.info(path)
-			file_type = file_name[file_name.find('.'):]
-			logger.info("File Type: " + file_type)
-			s3 = boto3.resource('s3')
-			try:
-				# Store the file from multi-part to Heroku Ephemeral File System
-				with open('image' + file_type, 'wb+') as destination:
-					for chunk in file.chunks():
-						destination.write(chunk)
-				# Determine correct file name on S3
-				imageNumber = 0
-				for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
-					number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
-					if (imageNumber < number):
-						imageNumber = number
-				# Store the image on S3
-				path = path + str(imageNumber + 1) + file_type
-				logger.info("Path: " + path)
-				data = open('image' + file_type, 'rb')
-				s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
-				return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
-			except FileNotFoundError:
-				return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
-			except (Exception, boto3.exceptions.S3UploadFailedError) as error:
-				return HttpResponse("Error: Insertion failed " + error, content_type = "text/plain")
-			except (Exception, botocore.exceptions.ClientError):
-				return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
-		else:
-			form = UploadFileForm()
-	return render(request, 'upload_image.html', {'form': form})
+	# Store file to temporary location then upload to s3
+	form = UploadFileForm(request.POST, request.FILES)
+	if (form.is_valid()):
+		hemisphere = request.POST.get('hemisphere', '')
+		zone = request.POST.get('zone', '')
+		easting = request.POST.get('easting', '')
+		northing = request.POST.get('northing', '')
+		find = request.POST.get('find', '')
+		file_name = request.POST.get('file_name', '')
+		file = request.FILES.get('myFile', '');
+		keyword = find_sql_keyword(file_name)
+		logger.info("Hemisphere: " + hemisphere)
+		logger.info("Zone: " + str(zone))
+		logger.info("Easting: " + str(easting))
+		logger.info("Northing: " + str(northing))
+		logger.info("Find: " + str(find))
+		logger.info("File name: " + file_name)
+		logger.info("Keyword: " + keyword)
+		# The form ensures the other fields must be integers
+		if (keyword != ''):
+			return HttpResponse('SQL keyword ' + keyword + ' not allowed in file name', content_type = 'text/plain')
+		path = hemisphere + "/" + str(zone) + "/" + str(easting) + '/' + str(northing) + '/' + str(find) + '/'
+		logger.info(path)
+		file_type = file_name[file_name.find('.'):]
+		logger.info("File Type: " + file_type)
+		s3 = boto3.resource('s3')
+		try:
+			# Store the file from multi-part to Heroku Ephemeral File System
+			with open('image' + file_type, 'wb+') as destination:
+				for chunk in file.chunks():
+					destination.write(chunk)
+			# Determine correct file name on S3
+			imageNumber = 0
+			for file in s3.Bucket(AWS_STORAGE_BUCKET_NAME).objects.filter(Prefix = path):
+				number = int(file.key[file.key.rfind('/') + 1:file.key.find('.')])
+				if (imageNumber < number):
+					imageNumber = number
+			# Store the image on S3
+			path = path + str(imageNumber + 1) + file_type
+			logger.info("Path: " + path)
+			data = open('image' + file_type, 'rb')
+			s3.Bucket(AWS_STORAGE_BUCKET_NAME).put_object(Key = path, Body = data)
+			return HttpResponse("https://s3.amazonaws.com/" + AWS_STORAGE_BUCKET_NAME + "/" + path, 'test/plain')
+		except FileNotFoundError:
+			return HttpResponse('Error: The file was not saved correctly to Heroku', content_type = 'text/plain')
+		except (Exception, boto3.exceptions.S3UploadFailedError) as error:
+			return HttpResponse("Error: Insertion failed " + error, content_type = "text/plain")
+		except (Exception, botocore.exceptions.ClientError):
+			return HttpResponse("Error: Bucket does not exist or credentials are invalid", content_type = 'text/plain')
+	else:
+		return HttpResponse("Error: Invalid Form", content_type = 'text/plain')
 
 # Route for fetching image urls
 # Param request - HTTP client request
