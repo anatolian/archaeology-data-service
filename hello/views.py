@@ -607,7 +607,9 @@ def set_color(request):
 		return HttpResponse("Error: location cannot be empty or contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	cursor.execute("SELECT * FROM options.munsell_colors;")
+	query = "SELECT * FROM options.munsell_colors WHERE rgb_red_256_bit IS NOT NULL AND rgb_green_256_bit IS NOT NULL"
+	query = query + " AND rgb_blue_256_bit IS NOT NULL;"
+	cursor.execute(query)
 	minDistance = 999999999.0
 	closest = []
 	for color in cursor.fetchall():
