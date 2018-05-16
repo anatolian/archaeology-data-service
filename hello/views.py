@@ -623,7 +623,10 @@ def set_color(request):
 			closest = color
 	query = "INSERT INTO finds.finds_colors VALUES (\'" + hemisphere + "\', " + zone + ", " + easting + ", " + northing + ", "
 	query = query + find + ", \'" + location + "\', " + str(closest[0]) + ", \'" + closest[1] + "\', " + str(closest[2]) + ", "
-	query = query + str(closest[3]) + ", " + red + ", " + green + ", " + blue + ");"
+	query = query + str(closest[3]) + ", " + red + ", " + green + ", " + blue + ") ON CONFLICT (hemisphere, zone, easting, northing, find, location)"
+	query = query + " DO UPDATE finds.finds_colors SET munsell_hue_number = EXCLUDED.munsell_hue_number, munsell_hue_letter = EXCLUDED.munsell_hue_letter,"
+	query2 = query2 + " munsell_lightness_value = EXCLUDED.munsell_lightness_value, munsell_chroma = EXCLUDED.munsell_chroma, rgb_red_256_bit = "
+	query2 = query2 + "EXCLUDED.rgb_red_256_bit, rgb_green_256_bit = EXCLUDED.rgb_green_256_bit, rgb_blue_256_bit = EXCLUDED.rgb_blue_256_bit;"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
@@ -632,21 +635,7 @@ def set_color(request):
 			response = HttpResponse("Update successful", content_type = 'text/plain')
 		connection.commit()
 	except (Exception, psycopg2.DatabaseError) as error:
-		query2 = "UPDATE finds.finds_colors SET munsell_hue_number = " + str(closest[0]) + ", munsell_hue_letter = \'" + closest[1] + "\',"
-		query2 = query2 + " munsell_lightness_value = " + str(closest[2]) + ", munsell_chroma = " + closest[3] + ", rgb_red_256_bit = "
-		query2 = query2 + green + ", rgb_blue_256_bit = " + blue + " WHERE utm_hemisphere = \'" + hemisphere + "\' AND utm_zone = "
-		query2 = query2 + red + ", rgb_green_256_bit = " + zone + " AND context_utm_easting_meters = " + easting + " AND context_utm_northing_meters = "
-		query2 = query2 + northing + " AND find_number = " + find + " AND color_location = \'" + location + "\';"
 		connection.rollback()
-		try:
-			cursor.execute(query2)
-			# Make sure the query updated a row
-			if (cursor.rowcount == 1):
-				response = HttpResponse("Update successful", content_type = 'text/plain')
-			connection.commit()
-		except (Exception, psycopg2.DatabaseError) as error2:
-			response = "Error: Update failed \n" + query + "\n" + error.pgerror + "\n" + query2 + "\n" + error2.pgerror
-			response = HttpResponse(response, content_type = "text/plain")
 	finally:
 		cursor.close()
 		connection.close()
