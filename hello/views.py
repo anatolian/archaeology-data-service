@@ -57,6 +57,9 @@ def find_sql_keyword(text):
 # Returns an HTTP response
 @csrf_exempt
 def upload_file(request):
+	logger.info(request)
+	logger.info(request.POST)
+	logger.info(request.FILES)
 	# Store file to temporary location then upload to s3
 	form = UploadFileForm(request.POST, request.FILES)
 	if (form.is_valid()):
