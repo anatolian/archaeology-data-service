@@ -672,18 +672,15 @@ def insert_find(request):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
-		str(hemisphere)
 		int(easting)
 		int(northing)
 		int(find)
 		float(latitude)
 		float(longitude)
-		str(status)
-		str(category)
-		str(comments)
 		float(ARratio)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
+	status = status.lower()
 	if (find_sql_keyword(comments) != ''):
 		return HttpResponse("Error: comments cannot contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
