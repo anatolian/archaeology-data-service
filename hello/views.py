@@ -689,8 +689,8 @@ def insert_find(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, "
-	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, position_recording_status, position_recording_ar_ratio, category_general, field_comments) VALUES (" + zone + ", " + hemisphere
-	query = query + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + status + "\', " + ARratio + ", \'" + category + "\', \'" + comments + "\');"
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, position_recording_status, position_recording_ar_ratio, category_general, field_comments) VALUES (" + zone + ", \'" + hemisphere
+	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + status + "\', " + ARratio + ", \'" + category + "\', \'" + comments + "\');"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
