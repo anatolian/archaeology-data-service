@@ -664,9 +664,10 @@ def insert_find(request):
 	latitude = request.GET.get("latitude", "");
 	longitude = request.GET.get("longitude", "");
 	altitude = request.GET.get("altitude", ""); # not used
-	status = request.GET.get("status", ""); # not used
+	status = request.GET.get("status", "");
 	category = request.GET.get("category", ""); 
-	comments = request.GET.get("comments", ""); # not used
+	comments = request.GET.get("comments", "");
+	ARratio = request.GET.get("ARratio", "");
 	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
@@ -680,15 +681,16 @@ def insert_find(request):
 		str(status)
 		str(category)
 		str(comments)
+		float(ARratio)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
 	if (find_sql_keyword(comments) != ''):
 		return HttpResponse("Error: comments cannot contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
-	query = "INSERT INTO finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, "
-	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, category_general) VALUES (" + zone + ", " + hemisphere
-	query = query + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + category + "\');"
+	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, context_utm_easting_meters, context_utm_northing_meters, find_number, "
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, position_recording_status, position_recording_ar_ratio, category_general, field_comments) VALUES (" + zone + ", " + hemisphere
+	query = query + ", " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", \'" + status + "\', " + ARratio + ", \'" + category + "\', \'" + comments + "\');"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
