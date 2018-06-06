@@ -703,3 +703,46 @@ def insert_find(request):
 		cursor.close()
 		connection.close()
 		return response
+		
+		
+# Get the team members from the database
+# Param: request - HTTP request
+# Returns an HTTP response
+def get_team_members(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT DISTINCT team_member FROM options.team_members ORDER BY team_member ASC;")
+	response = ''
+	found = False;
+	for teamMember in cursor.fetchall():
+		# Python thinks this is a tuple of 1 element
+		teamMemberString = str(teamMember[0])
+		response = response + teamMemberString + "\n"
+		found = True
+	if (not found):
+		response = 'Error: No team members found in the options database'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
+	
+	
+# Get the materials from the database
+# Param: request - HTTP request
+# Returns an HTTP response
+def get_material_generals(request):
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	cursor.execute("SELECT DISTINCT material_general FROM options.materials ORDER BY material_general ASC;")
+	response = ''
+	found = False;
+	for material in cursor.fetchall():
+		# Python thinks this is a tuple of 1 element
+		materialString = str(material[0])
+		response = response + materialString + "\n"
+		found = True
+	if (not found):
+		response = 'Error: No general materials found in the options database'
+	cursor.close()
+	connection.close()
+	return HttpResponse(response, content_type = 'text/plain')
+	

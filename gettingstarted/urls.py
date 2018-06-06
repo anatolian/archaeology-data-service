@@ -22,4 +22,6 @@ urlpatterns = [
 	url(r'^get_previous_find_id', hello.views.get_previous_find_id, name = 'Get previous find ID'),
 	url(r'^set_color', hello.views.set_color, name = 'Set find color'),
 	url(r'^insert_find', hello.views.insert_find, name = 'Insert a new find')
+	url(r'^get_team_members', hello.views.get_team_members, name = 'Get team members')
+	url(r'^get_material_generals', hello.views.get_material_generals, name = 'Get general materials')
 ]
