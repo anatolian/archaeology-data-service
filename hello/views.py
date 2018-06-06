@@ -676,6 +676,8 @@ def insert_find(request):
 		int(zone)
 		int(easting)
 		int(northing)
+		float(contextEasting)
+		float(contextNorthing)
 		int(find)
 		float(latitude)
 		float(longitude)
@@ -690,6 +692,72 @@ def insert_find(request):
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
 	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters) VALUES (" + zone + ", \'" + hemisphere
 	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ");"
+	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
+	try:
+		cursor.execute(query)
+		# Make sure the query updated a row
+		if (cursor.rowcount == 1):
+			response = HttpResponse("Update successful", content_type = 'text/plain')
+		connection.commit()
+	except (Exception, psycopg2.DatabaseError) as error:
+		response = HttpResponse("Error: Update failed\n" + error.pgerror, content_type = "text/plain")
+	finally:
+		cursor.close()
+		connection.close()
+		return response
+		
+# Add a path
+# Param: request - HTTP request
+# Returns an HTTP response
+def insert_path(request):
+	teamMember = request.GET.get("teamMember", "");
+	zone = request.GET.get("zone", "");
+	hemisphere = request.GET.get("hemisphere", "");
+	beginEasting = request.GET.get("beginEasting", "");
+	beginNorthing = request.GET.get("beginNorthing", "");
+	beginLatitude = request.GET.get("beginLatitude", "");
+	beginLongitude = request.GET.get("beginLongitude", "");
+	beginAltitude = request.GET.get("beginAltitude", "");
+	beginStatus = request.GET.get("beginStatus", "");
+	beginARRatio = request.GET.get("beginARRatio", "");
+	beginTime = request.GET.get("beginTime", "");
+	endEasting = request.GET.get("endEasting", "");
+	endNorthing = request.GET.get("endNorthing", "");
+	endLatitude = request.GET.get("endLatitude", "");
+	endLongitude = request.GET.get("endLongitude", "");
+	endAltitude = request.GET.get("endAltitude", "");
+	endStatus = request.GET.get("endStatus", "");
+	endARRatio = request.GET.get("endARRatio", "");
+	endTime = request.GET.get("endTime", "");
+	if (len(hemisphere) != 1):
+		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
+	try:
+		int(zone)
+		float(beginEasting)
+		float(beginNorthing)
+		float(beginLatitude)
+		float(beginLongitude)
+		float(beginAltitude)
+		float(beginARRatio)
+		float(endEasting)
+		float(endNorthing)
+		float(endLatitude)
+		float(endLongitude)
+		float(endAltitude)
+		float(endARRatio)
+	except ValueError:
+		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
+	beginStatus = beginStatus.lower()
+	endStatus = endStatus.lower()
+	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
+	cursor = connection.cursor()
+	query = "INSERT INTO survey.tracks (team_member, utm_hemisphere, utm_zone, begin_utm_easting_meters, begin_utm_northing_meters, end_utm_easting_meters, "
+	query = query + "end_utm_northing_meters, begin_longitude_decimal_degrees, begin_latitude_decimal_degrees, begin_altitude_meters, begin_position_recording_status, "
+	query = query + "begin_position_recording_ar_ratio, end_longitude_decimal_degrees, end_latitude_decimal_degrees, end_altitude_meters, end_position_recording_status, "
+	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', " + hemisphere + ", " + zone + ", " + beginEasting
+	query = query + ", " + beginNorthing + ", " + endEasting + ", " + endNorthing + ", " + beginLongitude + ", " + beginLatitude + ", " + beginAltitude + ", \'" 
+	query = query + beginStatus + "\', " + beginARRatio + ", " + endLongitude + ", " + endLatitude + ", " + endAltitude + ", \'" + endStatus + "\', " + endARRatio
+	query = query + ", to_timestamp(" + beginTime + "), to_timestamp(" + endTime + "));"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
