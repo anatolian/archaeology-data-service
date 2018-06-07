@@ -757,7 +757,7 @@ def insert_path(request):
 	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', " + hemisphere + ", \'" + zone + "\', " + beginEasting
 	query = query + ", " + beginNorthing + ", " + endEasting + ", " + endNorthing + ", " + beginLongitude + ", " + beginLatitude + ", " + beginAltitude + ", \'" 
 	query = query + beginStatus + "\', " + beginARRatio + ", " + endLongitude + ", " + endLatitude + ", " + endAltitude + ", \'" + endStatus + "\', " + endARRatio
-	query = query + ", to_timestamp(" + beginTime + "), to_timestamp(" + endTime + "));"
+	query = query + ", to_timestamp(cast(" + beginTime + " as TEXT),'YYYY-MM-DD'), to_timestamp(cast(" + endTime + " as TEXT),'YYYY-MM-DD'));"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
