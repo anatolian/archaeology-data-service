@@ -754,7 +754,7 @@ def insert_path(request):
 	query = "INSERT INTO survey.tracks (team_member, utm_hemisphere, utm_zone, begin_utm_easting_meters, begin_utm_northing_meters, end_utm_easting_meters, "
 	query = query + "end_utm_northing_meters, begin_longitude_decimal_degrees, begin_latitude_decimal_degrees, begin_altitude_meters, begin_position_recording_status, "
 	query = query + "begin_position_recording_ar_ratio, end_longitude_decimal_degrees, end_latitude_decimal_degrees, end_altitude_meters, end_position_recording_status, "
-	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', " + hemisphere + ", " + zone + ", " + beginEasting
+	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', " + hemisphere + ", \'" + zone + "\', " + beginEasting
 	query = query + ", " + beginNorthing + ", " + endEasting + ", " + endNorthing + ", " + beginLongitude + ", " + beginLatitude + ", " + beginAltitude + ", \'" 
 	query = query + beginStatus + "\', " + beginARRatio + ", " + endLongitude + ", " + endLatitude + ", " + endAltitude + ", \'" + endStatus + "\', " + endARRatio
 	query = query + ", to_timestamp(" + beginTime + "), to_timestamp(" + endTime + "));"
