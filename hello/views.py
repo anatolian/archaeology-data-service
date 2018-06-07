@@ -690,7 +690,7 @@ def insert_find(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
-	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general) VALUES (\'" + zone + "\', \'" + hemisphere
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general) VALUES (" + zone + ", \'" + hemisphere
 	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", \'" + material + "\');"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
@@ -754,7 +754,7 @@ def insert_path(request):
 	query = "INSERT INTO survey.tracks (team_member, utm_hemisphere, utm_zone, begin_utm_easting_meters, begin_utm_northing_meters, end_utm_easting_meters, "
 	query = query + "end_utm_northing_meters, begin_longitude_decimal_degrees, begin_latitude_decimal_degrees, begin_altitude_meters, begin_position_recording_status, "
 	query = query + "begin_position_recording_ar_ratio, end_longitude_decimal_degrees, end_latitude_decimal_degrees, end_altitude_meters, end_position_recording_status, "
-	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', " + hemisphere + ", \'" + zone + "\', " + beginEasting
+	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', \'" + hemisphere + "\', " + zone + ", " + beginEasting
 	query = query + ", " + beginNorthing + ", " + endEasting + ", " + endNorthing + ", " + beginLongitude + ", " + beginLatitude + ", " + beginAltitude + ", \'" 
 	query = query + beginStatus + "\', " + beginARRatio + ", " + endLongitude + ", " + endLatitude + ", " + endAltitude + ", \'" + endStatus + "\', " + endARRatio
 	query = query + ", to_timestamp(cast(" + beginTime + " as TEXT),'YYYY-MM-DD'), to_timestamp(cast(" + endTime + " as TEXT),'YYYY-MM-DD'));"
