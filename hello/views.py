@@ -745,6 +745,8 @@ def insert_path(request):
 		float(endLongitude)
 		float(endAltitude)
 		float(endARRatio)
+		float(beginTime)
+		float(endTime)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
 	beginStatus = beginStatus.lower()
@@ -757,7 +759,7 @@ def insert_path(request):
 	query = query + "end_position_recording_ar_ratio, begin_timestamp, end_timestamp) VALUES (\'" + teamMember + "\', \'" + hemisphere + "\', " + zone + ", " + beginEasting
 	query = query + ", " + beginNorthing + ", " + endEasting + ", " + endNorthing + ", " + beginLongitude + ", " + beginLatitude + ", " + beginAltitude + ", \'" 
 	query = query + beginStatus + "\', " + beginARRatio + ", " + endLongitude + ", " + endLatitude + ", " + endAltitude + ", \'" + endStatus + "\', " + endARRatio
-	query = query + ", to_timestamp(cast(" + beginTime + " as TEXT),'YYYY-MM-DD'), to_timestamp(cast(" + endTime + " as TEXT),'YYYY-MM-DD'));"
+	query = query + ", to_timestamp(CAST(" + beginTime + " AS DOUBLE PRECISION)), to_timestamp(CAST(" + endTime + " AS DOUBLE PRECISION)));"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
