@@ -691,7 +691,7 @@ def insert_find(request):
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
 	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general) VALUES (" + zone + ", \'" + hemisphere
-	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", " + material + ");"
+	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", \'" + material + "\');"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
@@ -731,24 +731,6 @@ def insert_path(request):
 	endTime = request.GET.get("endTime", "");
 	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
-	logger.info(teamMember)
-	logger.info(zone)
-	logger.info(beginEasting)
-	logger.info(beginNorthing)
-	logger.info(beginLatitude)
-	logger.info(beginLongitude)
-	logger.info(beginAltitude)
-	logger.info(beginStatus)
-	logger.info(beginARRatio)
-	logger.info(beginTime)
-	logger.info(endEasting)
-	logger.info(endNorthing)
-	logger.info(endLatitude)
-	logger.info(endLongitude)
-	logger.info(endAltitude)
-	logger.info(endStatus)
-	logger.info(endARRatio)
-	logger.info(endTime)
 	try:
 		int(zone)
 		float(beginEasting)
