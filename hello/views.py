@@ -676,8 +676,8 @@ def insert_find(request):
 		int(zone)
 		int(easting)
 		int(northing)
-		float(contextEasting)
-		float(contextNorthing)
+		float(contextEasting) #TODO: make this int
+		float(contextNorthing) #TODO: make this int
 		int(find)
 		float(latitude)
 		float(longitude)
@@ -690,8 +690,8 @@ def insert_find(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
-	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters) VALUES (" + zone + ", \'" + hemisphere
-	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ");"
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general) VALUES (" + zone + ", \'" + hemisphere
+	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", " + material + ");"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
@@ -731,6 +731,24 @@ def insert_path(request):
 	endTime = request.GET.get("endTime", "");
 	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
+	logger.v(teamMember)
+	logger.v(zone)
+	logger.v(beginEasting)
+	logger.v(beginNorthing)
+	logger.v(beginLatitude)
+	logger.v(beginLongitude)
+	logger.v(beginAltitude)
+	logger.v(beginStatus)
+	logger.v(beginARRatio)
+	logger.v(beginTime)
+	logger.v(endEasting)
+	logger.v(endNorthing)
+	logger.v(endLatitude)
+	logger.v(endLongitude)
+	logger.v(endAltitude)
+	logger.v(endStatus)
+	logger.v(endARRatio)
+	logger.v(endTime)
 	try:
 		int(zone)
 		float(beginEasting)
