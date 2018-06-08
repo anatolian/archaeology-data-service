@@ -670,6 +670,7 @@ def insert_find(request):
 	material = request.GET.get("material", ""); #not used 
 	comments = request.GET.get("comments", "");
 	ARratio = request.GET.get("ARratio", "");
+	timestamp = request.GET.get("timestamp", "");
 	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
@@ -682,6 +683,7 @@ def insert_find(request):
 		float(latitude)
 		float(longitude)
 		float(ARratio)
+		float(timestamp)
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
 	status = status.lower()
@@ -690,8 +692,8 @@ def insert_find(request):
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
-	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general, material_specific) VALUES (" + zone + ", \'" + hemisphere
-	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", \'" + material + "\', '');"
+	query = query + "latitude_decimal_degrees, longitude_decimal_degrees, utm_altitude, position_recording_status, position_recording_ar_ratio, field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general, material_specific, location_timestamp) VALUES (" + zone + ", \'" + hemisphere
+	query = query + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing + ", \'" + material + "\', '', to_timestamp(CAST(" + timestamp + " AS DOUBLE PRECISION)));"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
