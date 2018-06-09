@@ -687,8 +687,6 @@ def insert_find(request):
 	except ValueError:
 		return HttpResponse("Error: One or more parameters are invalid", content_type = 'text/plain');
 	status = status.lower()
-	if (find_sql_keyword(comments) != ''):
-		return HttpResponse("Error: comments cannot contain SQL keyword", content_type = 'text/plain')
 	connection = psycopg2.connect(host = hostname, user = username, password = password, dbname = database)
 	cursor = connection.cursor()
 	query = "INSERT INTO finds.finds (utm_zone, utm_hemisphere, utm_easting_meters, utm_northing_meters, find_number, "
