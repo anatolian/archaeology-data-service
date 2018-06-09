@@ -696,7 +696,7 @@ def insert_find(request):
 	query = query + "field_comments, context_utm_easting_meters, context_utm_northing_meters, material_general, material_specific, location_timestamp) "
 	query = query + "VALUES (" + zone + ", \'" + hemisphere + "\', " + easting + ", " + northing + ", " + find + ", " + latitude + ", " + longitude
 	query = query + ", " + altitude + ", \'" + status.lower() + "\', " + ARratio + ", \'" + comments + "\', " + contextEasting + ", " + contextNorthing
-	query = query + ", \'" + material + "\', '', to_timestamp(" + timestamp + " / 1000) AT TIME ZONE \'SCT\');"
+	query = query + ", \'" + material + "\', '', to_timestamp(" + timestamp + " / 1000));"
 	response = HttpResponse("Error: No records updated\n" + query, content_type = 'text/plain')
 	try:
 		cursor.execute(query)
