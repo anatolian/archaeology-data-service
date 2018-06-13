@@ -564,7 +564,7 @@ def insert_find(request):
 	altitude = request.GET.get("altitude", "");
 	status = request.GET.get("status", "");
 	material = request.GET.get("material", ""); #not used 
-	comments = request.GET.get("comments", "");
+	comments = urllib.unquote(request.GET.get("comments", "")).decode('UTF-8');
 	ARratio = request.GET.get("ARratio", "");
 	timestamp = request.GET.get("timestamp", "");
 	if (len(hemisphere) != 1):
