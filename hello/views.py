@@ -564,17 +564,17 @@ def insert_find(request):
 	altitude = request.GET.get("altitude", "");
 	status = request.GET.get("status", "");
 	material = request.GET.get("material", ""); #not used 
-	comments = urllib.unquote(request.GET.get("comments", "")).decode('UTF-8');
+	comments = request.GET.get("comments", "");
 	ARratio = request.GET.get("ARratio", "");
 	timestamp = request.GET.get("timestamp", "");
 	if (len(hemisphere) != 1):
 		return HttpResponse("<h3>Error: hemisphere is not a character</h3>", content_type = 'text/html')
 	try:
 		int(zone)
-		int(easting)
-		int(northing)
-		float(contextEasting) #TODO: make this int
-		float(contextNorthing) #TODO: make this int
+		float(easting)
+		float(northing)
+		int(contextEasting)
+		int(contextNorthing)
 		int(find)
 		float(latitude)
 		float(longitude)
@@ -714,4 +714,3 @@ def get_material_generals(request):
 	cursor.close()
 	connection.close()
 	return HttpResponse(response, content_type = 'text/plain')
-	
